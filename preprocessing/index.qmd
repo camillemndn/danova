@@ -1,0 +1,121 @@
+```{r setup}
+#| include: false
+
+source("setup.R")
+
+library(boot)
+library(dda)
+library(fdANOVA)
+library(fda.usc)
+library(MVN)
+library(sf)
+library(tidyverse)
+set.seed(10983)
+
+data(vietnam_temperature_dd)
+data(vietnam_regions)
+data(vietnam_provinces)
+```
+
+# Data description and preprocessing
+
+## Description
+
+```{r fig-map}
+#| fig-cap: Map of Vietnam by region.
+
+vietnam_provinces |>
+  left_join(vietnam_regions, by = c("region" = "code")) |>
+  rename(region_name = name) |>
+  ggplot(aes(fill = region_name)) +
+  geom_sf() +
+  scale_x_continuous(breaks = seq(from = -180, to = 180, by = 2)) +
+  labs(x = "Longitude", y = "Latitude", fill = "Region")
+```
+
+## Smoothing
+
+```{r fig-smoothing}
+#| fig-cap: Density of maximum temperature grouped per region.
+
+vntry <- vietnam_temperature_dd |>
+  left_join(vietnam_regions, by = c("region" = "code")) |>
+  rename(region_name = name) |>
+  arrange(region, province) |>
+  select(!province) |>
+  group_by(region_name, year) |>
+  summarise(t_max = mean(t_max))
+
+vntry |> plot_funs(t_max, color = region_name, linewidth = year, alpha = year) +
+  facet_grid(vars(str_wrap(region_name, 14)), scales = "free_y") +
+  scale_linewidth(range = c(0.2, 2)) +
+  theme_legend_inside +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density",
+    color = "Region"
+  )
+```
+
+## Trend estimation by province
+
+Here is one possible way to evaluate a time evolution in the population
+of temperature densities in the provinces of a given region (or of the
+whole Vietnam) which is more Bayes compatible than the previous one. Let
+us use a slightly different notation to indicate the time dependence.
+Let $\pi_{it}$ be the density in province $i, i=1,n$ at time $t, t=1,T$.
+We imagine a simple model where the densities in a fixed province $i$
+evolve linearly in time: $$\label{eq:slopereg}
+    \pi_{git}(x)= \alpha_{gi}(x) \oplus [t\odot \beta_{gi}(x)] \oplus \epsilon_{git},$$
+where $\beta_{gi}$ is the trend density for province $i$ in region $g$.
+
+In $L^2(a,b)$ the model for a given province writes
+$$\operatorname{clr}(\pi_{git})(x) =  \operatorname{clr}(\alpha_{gi})(x) + t \operatorname{clr}(\beta_{gi})(x) + \operatorname{clr}(\epsilon_{git})(x)$$
+
+```{r fig-trends}
+#| fig-cap: Trends by province in each region.
+
+to_trend <- function(ddobj, t = seq_len(ncol(ddobj$coefs))) {
+  model <- lm(t(ddobj$coefs) ~ t)
+
+  # Density-on-scalar regression
+  trend <- ddobj
+  trend$coefs <- model$coefficients["t", ]
+
+  # Compute functional R^2
+  eps <- ddobj
+  eps$coefs <- t(model$residuals)
+  ssr_evol <- diag(inprod(eps, eps))
+  sst_evol <- diag(inprod(ddobj, ddobj))
+  ssr <- sum(ssr_evol)
+  sst <- sum(sst_evol)
+
+  trend <- dd(clr = fd(trend$coefs, trend$basis))
+  attr(trend, "rsq") <- 1 - ssr / sst
+  attr(trend, "ssr_evol") <- data.frame(t = t, ssr = ssr_evol)
+  trend 
+}
+
+vnt <- vietnam_temperature_dd |>
+  group_by(region, province) |>
+  summarise(t_max = list(c(t_max)), .groups = "drop") |>
+  rowwise() |>
+  mutate(t_max = list(to_trend(t_max))) |>
+  mutate(rsq = attr(t_max, "rsq")) |>
+  mutate(ssr_evol = list(attr(t_max, "ssr_evol"))) |>
+  ungroup() |>
+  left_join(vietnam_regions, by = c("region" = "code")) |>
+  rename(region_name = name) |>
+  arrange(region, province)
+class(vnt$t_max) <- c("ddl", "fdl", "list")
+
+vnt |> plot_funs(t_max, color = region_name) +
+  facet_grid(vars(str_wrap(region_name, 14)), scales = "free_y") +
+  theme(legend.position = "none", axis.title.y = element_text(angle = -90)) +
+  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density",
+    color = "Region"
+  )
+```

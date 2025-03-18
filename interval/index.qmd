@@ -1,0 +1,47 @@
+# Interval-wise interpretation
+
+enlever le t, t' et garder t, t+1 page 12 de l'article Sonya notation
+$OR_{x\mid z}(\beta_{..}$ ou $OR_{x\mid z}(\beta_{g.})$
+
+pas d'anova ici, mais test de Student sur les log odds ratios
+(différences de clr), et tests de Student simultanément dans chaque
+région (ajustés)
+
+## Global trend
+
+We focus on subintervals $I \subset (a,b)$ and wish to make assessments
+about the time evolution of the relative probability to be in one
+interval versus the other.
+
+### Application: global change in temperature distribution over the period 1987-2016
+
+We can rely on Maier et al. (2024), see pages 10 and 11, proposition
+3.1, for the definition of the infinitesimal odds-ratios and their
+interpretation. The objective is to compare two densities at two
+different temperatures $x$ and $z$ in the range of temperature. let
+$\operatorname{OR}^{x\mid z}_{t\mid t'}$ be
+$$\operatorname{OR}^{x\mid z}_{t\mid t'} =
+ \frac{\frac{\pi_{it}(x)}{\pi_{it}(z)}}{\frac{\pi_{it'}(x)}{\pi_{it'} (z)}}
+ = \frac{\pi_{it}(x) \ominus \pi_{it'}(x)}{\pi_{it}(z) \ominus \pi_{it'}(z)}$$
+$\operatorname{OR}^{x\mid z}_{t\mid t'}$ allows to compare the density
+at time $t$ and $t'$ as follows. It is an odds ratio: the ratio of the
+odds of $x$ versus $z$ at time $t$ by the odds of $x$ versus $z$ at time
+$t'$. In the model
+[\[eq:slopereg\]](#eq:slopereg){reference-type="eqref"
+reference="eq:slopereg"}, assuming $\epsilon_{git}=0$, we have that
+$$\operatorname{OR}^{x\mid z}_{t\mid t'} = (\frac{\beta_{gi} (x)}{\beta_{gi} (z)})^{(t-t')}$$
+which is linked to the rate of change of the odds of $x$ versus $z$ in
+the period $(t',t).$ Because the probability of an event is an
+increasing function of its odds, if we observe that
+$\operatorname{OR}^{x\mid z}_{t\mid t'} >1$ for all $x,z$ when $x$ is in
+a given interval $A$ and $z$ in a given interval $B,$ then we may
+conclude that conditional on the temperature being in $A$ or $B$, the
+probability of being closer to $x$ than to $z$ at time $t$ is larger
+than the probability of being close to $x$ than to $z$ at time $t'.$
+Note that when $t>t'$ $\operatorname{OR}^{x\mid z}_{t\mid t'} >1$ is
+equivalent to $\beta_{gi}(x) > \beta_{gi}(z)$.
+
+## Regional trends
+
+### Application: regional changes in temperature distribution over the period 1987-2016
+

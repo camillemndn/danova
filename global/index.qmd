@@ -1,0 +1,304 @@
+# Global tests
+
+## One-sample problem
+
+
+```{r fig-trends_mean}
+#| fig-cap:
+#|  - Mean annual trend of the maximum temperature distributions between 1987 and 2016.
+#|  - Centered log-ratio transform of the mean annual trend of maximum temperature distributions between 1987 and 2016.
+
+vnt |>
+  pull(t_max) |>
+  mean() |>
+  plot() +
+  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), color = "red", linetype = "dotted") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density"
+  )
+
+vnt |>
+  pull(t_max) |>
+  mean() |>
+  as.fd() |>
+  plot() +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "clr"
+  )
+```
+
+Expliquer davantage l'implémentation (approximation chi-2 etc.) Zhang a
+partir de page 107.
+
+Inlcure graphique de la moyenne globale
+
+Here $G=1$ therefore we eliminate the index $g$ from previous notations.
+We are given a reference density $\pi_0.$ Of particular interest is the
+case $\pi_0$ is the null element of the Bayes space.
+
+### Test hypotheses
+
+$H_0: {\mathbb E}^B (\pi_i) = \pi_0, \forall i=1, \ldots n$. Because
+$${\mathbb E}^B (\pi_i) = \pi_0 \Leftrightarrow \operatorname{clr} {\mathbb E}^B (\pi_i) =  \operatorname{clr} \pi_0 \Leftrightarrow {\mathbb E} (\operatorname{clr} \pi_i) =  \operatorname{clr} \pi_0$$
+we may use one-sample test in $L^2$ space. Answers the question: "is the
+mean density equal to the reference $\pi_0$ ?"
+
+Local test for fixed $x$: $H_0: {\mathbb E}^B (\pi_i)(x) = \pi_0 (x)$?
+
+Two problems:
+
+-   $H_0: \mathbb{E}^B(\pi_1)(x) = \mathbb{E}^B(\pi_2)(x)$ for a given
+    point $x$ is not equivalent to
+    $\operatorname{clr}\mathbb{E}^B(\pi_1)(x) = \operatorname{clr}\mathbb{E}^B(\pi_2)(x)$
+    because the clr involves all x's therefore the Student statistic is
+    not appropriate.
+
+-   Meaning of pointwise hypotheses for a density function which is
+    defined almost everywhere ?? only makes sense on subintervals, we
+    would like to know on which ranges of $x$ the densities $\pi_i$
+    differ from $\pi_0$.
+
+### Test statistics
+
+Two options:
+
+-   Norm approach
+    $$T_\text{norm}= n \| \operatorname{clr} (\bar{\pi}_{..}) - \operatorname{clr} (\pi_0) \|^2_{L^2_0(a,b)}$$
+    Reference: [@kokoszka_introduction_2017]
+
+-   PC approach (Martin, report 7, page 13 et Kokotzka page 269)
+    Hotelling's T-square statistic based on functional PCA $T_{PC}.$
+    Given a truncation with $p$ terms
+    $$T_{PC} = n\sum_{k=1}^p \frac{\langle \operatorname{clr} (\bar{\pi}_{..}) - \operatorname{clr} (\pi_0), v_k \rangle_{L^2_0(a,b)}^2}{\hat \lambda_k,}$$
+    where $\lambda_k$ are the eigenvalues and $v_k$ the eigenfunctions
+    of FPCA.
+
+Comparison: Kokoszka recommends that the PC approach be used when a very
+small number of PCs explain a larger proportion of variability, and to
+use the norm approach otherwise.
+
+### Application: changes in temperature distribution over the period 1987-2016
+
+Changes in temperature distributions will be measured through linear
+trends by province.
+
+We perform the one-sample test for the trend sample of $\beta_{gi},$ and
+$\pi_0$ equal to the neutral element (uniform density on $(a,b).$ it
+allows to answer the question: "are the mean trend densities in the
+provinces equal to the Bayes neutral element $\pi_0$" ?
+
+## Distributional ANOVA
+
+
+```{r fig-trends_regional_means}
+#| fig-cap: Regional mean trend and overall trend.
+vntr <- vnt |>
+  select(!province) |>
+  group_by(region_name) |>
+  summarise(t_max = mean(t_max))
+
+vntr |> plot_funs(t_max, color = region_name) +
+  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
+  geom_function(fun = function(x) eval(mean(c(vnt$t_max)), x), color = "black", linetype = "dotted", linewidth = 1) +
+  theme_legend_inside +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density",
+    color = "Region"
+  )
+```
+
+### Test hypotheses
+
+$H_0: \forall g \quad {\mathbb E}^B (\pi_{gi}) = {\mathbb E}^B (\pi_{1i})$
+equivalent to
+$H_0: \forall g \quad {\mathbb E} (\text{clr }\pi_{gi}) = {\mathbb E} (\text{clr }\pi_{1i})$
+
+[Chris: with the model definition of
+[\[eq:danova_model2\]](#eq:danova_model2){reference-type="eqref"
+reference="eq:danova_model2"}, $H_0$ becomes the equality of all group
+main-effect to zero
+$H_0: \forall g \quad {\mathbb E}^B (\alpha_{g}) = 0_{{\cal B}^2}$
+]{style="color: blue"}
+
+### Test statistics
+
+Reference the FANOVA version is [@gorecki_fdanova_2019].
+
+In the forthcoming formulas, to adapt FANOVA to DANOVA, the pointwise
+variations $SSB(x)$ and $SSW(x)$ from
+[\[eq:SSBloc\]](#eq:SSBloc){reference-type="eqref"
+reference="eq:SSBloc"} and
+[\[eq:SSWloc\]](#eq:SSWloc){reference-type="eqref"
+reference="eq:SSWloc"} will be applied to the clr transforms
+$f_{gi}= \operatorname{clr}(\pi_{gi}).$
+
+1.  The $L^2$-norm based test from [@zhang_statistical_2007]. The test
+    statistic is given by $$\label{eq:zhang}
+        L^2B= \int_a^b SSB(x)dx$$ Note that an alternative formula for
+    $L^2B$ when applied to clr of densities is given by
+    $$\label{eq:zhang2}
+        L^2B= \sum_{g=1}^G n_g \parallel \bar\pi_{g.} - \bar\pi_{..}\parallel^2_{B^2},$$
+    which shows that this statistic can be expressed as a norm and is
+    therefore invariant under almost-everywhere equality. Moreover this
+    norm coincides with the norm in Bayes space of the difference
+    between group means and overall mean. The `L2B` implementation uses
+    an asymptotic distribution of the test statistic.
+
+2.  The `CS` statistic from [@cuevas_anova_2004] uses pairwise
+    differences. When applied to clr of densities, due to the linearity
+    of $\operatorname{clr}$, we get $$\label{eq:cuevas}
+        CS = \sum_{g<g'} n_g \int_a^b \left( \operatorname{clr} {\bar\pi_{g.}}(x)- \operatorname{clr} {\bar\pi_{g'.}}(x) \right)^2dx =  \sum_{g<g'} n_g  \parallel \bar\pi_{g.} - \bar\pi_{g'.}\parallel^2_{B^2}$$
+
+    The `CS` implementation in the `fdANOVA` package uses a
+    heteroscedastic assumption and parametric bootstrap. Note that an
+    alternative formula for $CS$ is the sum of the Bayes norm of the
+    pairwise differences between groups.
+
+3.  $F$-type tests using both within and between variation, see
+    [@zhang_statistical_2011] and [@shen_f_2004]. We choose the `FB`
+    implementation (biased-reduced) for the quantile computation under
+    the null. $$\label{eq:Fvdb}
+        FB = \frac{{\int_a^b SSB(x)dx}/(G-1)}{\int_a^b SSW(x)dx /(n-G)} = \frac{\sum_{g=1}^G n_g \parallel \bar\pi_{g.} - \bar\pi_{..}\parallel^2_{B^2}/(G-1)}{\sum_{g=1}^G \sum_{i=1}^{n_g}  \parallel \pi_{gi} - \bar\pi_{g.}\parallel^2_{B^2}/(n-G)},$$
+    Under the null hypothesis, this statistic is asymptotically equal to
+    a linear combination of independent $\chi^2$ for the numerator and
+    the denominator, which can be approximated by a Fischer distribution
+    [@zhang_statistical_2011 Theorem 1 and equation 2.16]. This approach
+    coincides with the approach of [@van_den_boogaart_bayes_2014] by the
+    second equality in [\[eq:Fvdb\]](#eq:Fvdb){reference-type="eqref"
+    reference="eq:Fvdb"}. Note that [@van_den_boogaart_bayes_2014] use a
+    bootstrap procedure rather than the above approximation.
+
+4.  `GPF` from [@zhang_one-way_2014]: instead of integrating separately
+    the pointwise within variation (resp: between), the test statistic
+    integrates the pointwise F-ratio: $$\label{eq:GPF}
+        GPF = \int_a^b \frac{SSB(x)/(G-1)}{SSW(x)/(n-G)}dx$$ Under the
+    null hypothesis, this statistic is asymptotically equal to a linear
+    combination of independent $\chi^2$, which can be approximated by a
+    $\chi^2$-distribution [@zhang_one-way_2014 Proposition 1]. In the
+    implementation of the `fdANOVA` package, `GPF` is divided by $b-a$,
+    and the null distribution is modified accordingly.
+
+5.  `Fmax` from [@zhang_new_2019]: instead of integrating the pointwise
+    F-ratio as in `GPF`, they compute its supremum. We consider the
+    implementation `Fmaxb` which bootstraps the distribution under the
+    null hypothesis. $$\label{eq:Fmax}
+        F_{\max} = \sup_{x \in (a,b)} \frac{SSB(x)/(G-1)}{SSW(x)/(n-G)}$$
+    The statistic $F_{\max}$ is the only one that is not invariant under
+    almost-everywhere equality: changing one value of a density in the
+    dataset might change the value of $F_{\max}$. Note also that the
+    statistics $GPF$ and $F_{\max}$ cannot be written straightforwardly
+    in terms of norms in the Bayes space.
+
+Argument: in [@gorecki_fdanova_2018], they claim that the GPF test is
+more powerful than the F-type tests (page 5).
+
+### Application: regional changes in temperature distribution over the period 1987-2016
+
+$\pi_{git}$ maximum daily temperature density f for year $t$. We first
+apply for each province the trend estimation and obtain the set of trend
+densities $\beta_{gi=}.$ Then we test whether these trend densities vary
+across regions. Table [1](#tab:my_label){reference-type="ref"
+reference="tab:my_label"} summarizes the results for the above tests
+which all conclude that there is a difference in the way the regionial
+temperature densities evolve in time.
+
+```{r tbl-trends_danova_global}
+#| warning: false
+
+vnte <- vnt |>
+  mutate(t_max = as.fd(t_max)) |>
+  eval_funs(t_max, n = 1401) |>
+  select(province, x, y) |>
+  pivot_wider(names_from = province, values_from = y) |>
+  column_to_rownames("x")
+
+vnt_province_region <- vietnam_provinces$region
+names(vnt_province_region) <- vietnam_provinces$province
+
+stat_list <- list("GPF", "Fmaxb", "CS", "L2B", "FB")
+
+res <- fanova.tests(vnte, vnt_province_region[colnames(vnte)],
+  test = stat_list,
+  params = list(
+    paramCS = 100,
+    paramFmaxb = 100,
+    paramTRP = list(B.TRP = 100)
+  )
+)
+
+res_tbl <- res[as_vector(stat_list)] |>
+  sapply(function(x) c(`Statistic` = x$stat, `p-value` = x$pval)) |>
+  t() |>
+  as.data.frame() |>
+  rownames_to_column("Name")
+
+kable_format(res_tbl)
+```
+
+## Pairwise comparisons
+
+When the test of equality of the group mean densities is significant,
+conducting a post-hoc analysis of pairwise group mean comparisons can
+help identify which pairs differ. Testing whether the mean density in
+group $g_1$ is equal to the mean density in group $g_2$ is then
+equivalent to test whether the negative perturbation between these two
+means is equal to the neutral element in the space $B^2(a,b)$, which is
+the uniform density on $(a,b).$ In $L^2_0(a,b)$ it is also equivalent to
+test whether the clr of the mean density of group $g_1$ is equal to the
+clr of the mean density of group $g_2.$ Mathematically, these tests are
+the same as in the previous section for the case of two groups. A
+multiple testing correction is necessary when performing theses tests
+for all pairs of groups.
+
+### Test hypotheses
+
+For comparing group $g$ and $g'$:
+
+$H_0: \quad {\mathbb E}^B (\pi_{gi}) = {\mathbb E}^B (\pi_{g'i})$
+equivalent to
+$H_0: \forall g \quad {\mathbb E} (\text{clr }\pi_{gi}) = {\mathbb E} (\text{clr }\pi_{g'i})$
+
+### Test statistics
+
+Same as in previous section ? two ways: do a 2 group anova or do a one
+sample test on the difference between two groups ? equivalent for
+univariate but not here see Zhang page 137 in book. voir page 140 pour
+la comparaison.
+
+### Application: regional changes in temperature distribution over the period 1987-2016
+
+```{r tbl-trends_danova_pairwise}
+vntp <- t(combn(c("NMM", "RRD", "NCC", "CHR", "SR", "MDR"), m = 2))
+colnames(vntp) <- c("region1", "region2")
+
+pairwise_anova <- function(region1, region2) {
+  data <- vnte[vnt_province_region[colnames(vnte)] %in% c(region1, region2)]
+
+  res <- fanova.tests(data, vnt_province_region[colnames(data)],
+    test = stat_list,
+    params = list(
+      paramCS = 100,
+      paramFmaxb = 100,
+      paramTRP = list(B.TRP = 100)
+    )
+  )
+
+  res[as_vector(stat_list)] |>
+    sapply(function(x) c(x$pval)) |>
+    c()
+}
+
+multiple_testing <- function(tbl, m) {
+  mutate(tbl, across(where(is.numeric), ~ 1 - (1 - .x)^m))
+}
+
+res_tbl <- as_tibble(vntp) |>
+  rowwise() |>
+  mutate(res = map2(region1, region2, pairwise_anova)) |>
+  unnest_wider(res)
+
+kable_format(multiple_testing(res_tbl, m = nrow(res_tbl)))
+```

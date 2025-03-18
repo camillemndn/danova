@@ -1,0 +1,7 @@
+.math.display {
+  display: block;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
