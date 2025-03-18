@@ -1,0 +1,40 @@
+project:
+  type: manuscript
+
+bibliography: references.bib
+cache: true
+citation: true
+df-print: kable
+lang: en
+lightbox: true
+link-external-newwindow: true
+notebook-links: false
+number-sections: true
+warning: false
+
+format:
+  html:
+    theme: cosmo
+    fig-format: svg
+    code-fold: true
+    css: styles.css
+    include-in-header:
+      text: |
+        <script defer data-domain="camillemondon.com" src="https://analytics.mondon.xyz/js/script.js"></script>
+  arxiv-pdf:
+    authorcols: true
+    biblatexoptions:
+      - style=authoryear
+      - backend=biber
+      - backref=true
+    cite-method: biblatex
+    colorlinks: false
+    echo: false
+    fig-format: pdf
+    link-citations: true
+    pdf-engine: pdflatex
+
+knitr:
+  opts_knit:
+    fig.align: center
+    root.dir: ./

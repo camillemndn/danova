@@ -1,0 +1,134 @@
+---
+title: Testing the equality of mean densities of temperature in Vietnam
+date: today
+date-format: long
+license: CC BY
+author:
+  - name:
+      given: Camille
+      family: Mondon
+    url: https://camillemondon.com
+    email: camille.mondon@tse-fr.eu
+    orcid: 0009-0007-4569-990X
+    roles:
+      - conceptualization
+      - investigation
+      - writing – original draft
+    affiliations:
+      - id: tse
+        name: Toulouse School of Economics
+        department: Mathematics and Statistics
+        address: 1, Esplanade de l'Université
+        city: Toulouse
+        region: Occitanie
+        country: France
+        postal-code: 31000
+        url: https://www.tse-fr.eu/department-mathematics-and-statistics
+  - name:
+      given: Huong Thi
+      family: Trinh
+    url: https://sites.google.com/tmu.edu.vn/huongtrinhthi/home
+    email: trinhthihuong@tmu.edu.vn
+    orcid: 0000-0002-5940-6588
+    roles:
+      - conceptualization
+      - investigation
+      - writing – original draft
+    affiliations:
+      - id: thuongmai
+        name: Thuongmai University
+        department: Faculty of Mathematical Economics
+        city: Hanoi
+        country: Vietnam
+        url: https://tmu.edu.vn/
+  - name:
+      given: Josep Antoni
+      family: Martín-Fernández
+    email: josepantoni.martin@udg.edu
+    orcid: 0000-0003-2366-1592
+    roles:
+      - supervision
+      - conceptualization
+      - investigation
+      - writing – original draft
+    affiliations:
+      - id: girona 
+        name: University of Girona
+        department: Computer Science, Applied Mathematics and Statistics
+        city: Girona
+        region: Catalonia
+        country: Spain
+        url: http://www.udg.edu/
+  - name:
+      given: Christine
+      family: Thomas-Agnan
+    url: https://www.tse-fr.eu/fr/people/christine-thomas-agnan
+    email: christine.thomas@tse-fr.eu
+    orcid: 0000-0002-6430-3110
+    roles:
+      - supervision
+      - conceptualization
+      - investigation
+      - writing – original draft
+    affiliations:
+      - ref: tse
+
+abstract: ""
+keywords:
+  - Bayes spaces
+citation:
+  type: article-journal
+  container-title: Stochastic Environmental Research and Risk Assessment
+---
+
+# To-do
+
+- Compute min (or mean) R^2 of density-on-time regression
+- One sample test (global and per region?)
+- Plots of globally-centred regional means
+- Plots of trends with thresholds to interpret using odds ratios (grouped by South/Center/RRD)
+- Order plots per latitude (change color gradient)
+
+
+# Framework and notations
+
+-   for FANOVA: Zhang p. 144 we observe $G$ independent functional
+    samples, denoted by $(f_{gi}, \ldots, f_{gn_g}),$
+    $(i=1, \ldots n_g), (g=1,\ldots, G),$ from stochastic processes
+    satisfying $$f_{gi}(x)= f_g(x) + v_{gi}(x),$$ where
+    $f_g(x) = {\mathbb E}(f_{gi})(x)$ is the unknown mean function in
+    group $g$ and the stochastic error process $v_{gi}$ has mean $0$ and
+    common covariance function $\gamma$. Total sample size
+    $n=\sum_{g=1}^G n_g$.
+
+    -   Overall sample mean curve
+        $\bar f_{..}(x) = \frac{1}{n}\sum_{g=1}^G \sum_{i=1}^{n_g} f_{gi}(x)$
+
+    -   sample mean curve in group $g$
+        $\bar f_{g.}(x) =\frac{1}{n_g}\sum_{i=1}^{n_g} f_{gi}(x)$.
+
+    -   pointwise between-group sum of square errors
+        $\operatorname{SSB}(x)$ at point $x$ is $$\label{eq:SSBloc}
+            \operatorname{SSB}(x)=  \sum_{g=1}^G n_g \left( \bar f_{g.}(x) - \bar f_{..}(x) \right)^2$$
+
+    -   pointwise within-group sum of squared errors
+        $\operatorname{SSW}(x)$ at point $x$ is $$\label{eq:SSWloc}
+            \operatorname{SSW}(x)= \sum_{g=1}^G \sum_{i=1}^{n_g} \left( f_{gi}(x)-\bar f_{g.}(x) \right)^2.$$
+
+-   For DANOVA: we observe $G$ independent density samples, denoted by
+    $(\pi_{gi}, \ldots, \pi_{gn_g}), \in {\cal B}^2(a,b), (i=1, \ldots n_g), (g=1,\ldots, G),$
+    from stochastic processes satisfying $$\label{eq:danova_model}
+        \pi_{gi}(x)= \pi_g(x) \oplus u_{gi}(x),$$ where
+    $\pi_g(x) = {\mathbb E}^B(\pi_{gi})(x)$ is the unknown mean density
+    in group $g$ and the stochastic error process $u_{gi}$ has mean $0$
+    and common covariance function $\gamma$. Total sample size
+    $n=\sum_{g=1}^G n_g$. Note the covariance function of the
+    ${\cal B}^2(a,b)$ valued process $u_{gi}$ is defined as
+    $\operatorname{Cov^B}(u)= \operatorname{Cov}(\operatorname{clr}(u)).$
+
+{{< include preprocessing/index.qmd >}}
+{{< include global/index.qmd >}}
+{{< include interval/index.qmd >}}
+{{< include conclusion/index.qmd >}}
+{{< include acknowledgements/index.qmd >}}
+{{< include appendix/index.qmd >}}
