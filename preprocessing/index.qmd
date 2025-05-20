@@ -2,6 +2,14 @@
 #| include: false
 
 source("setup.R")
+```
+
+# Data description and preprocessing
+
+## Description
+
+```{r fig-map}
+#| fig-cap: Map of Vietnam by region.
 
 library(boot)
 library(dda)
@@ -15,14 +23,6 @@ set.seed(10983)
 data(vietnam_temperature_dd)
 data(vietnam_regions)
 data(vietnam_provinces)
-```
-
-# Data description and preprocessing
-
-## Description
-
-```{r fig-map}
-#| fig-cap: Map of Vietnam by region.
 
 vietnam_provinces |>
   left_join(vietnam_regions, by = c("region" = "code")) |>
@@ -92,7 +92,7 @@ to_trend <- function(ddobj, t = seq_len(ncol(ddobj$coefs))) {
 
   trend <- dd(clr = fd(trend$coefs, trend$basis))
   attr(trend, "rsq") <- 1 - ssr / sst
-  attr(trend, "ssr_evol") <- data.frame(t = t, ssr = ssr_evol)
+  attr(trend, "ssr_evol") <- data.frame(t = t, ssr = ssr_evol/sst_evol)
   trend 
 }
 

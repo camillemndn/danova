@@ -3,6 +3,7 @@
 ## Residuals in temporal regression {.appendix .unnumbered}
 
 ```{r fig-residuals}
+#| fig-cap: $\frac{\| \varepsilon (t) \|^2}{\| y(t) - \overline y (t) \|^2}$.
 vnt |>
   select(!rsq) |>
   unnest(ssr_evol) |>
@@ -10,7 +11,10 @@ vnt |>
   geom_point() +
   geom_line() +
   facet_wrap(vars(region))
+```
 
+```{r fig-rsq-map}
+#| fig-cap: $R^2 = \frac{\sum_t \| \varepsilon (t) \|^2}{\sum_t \| y(t) - \overline y (t) \|^2}$.
 vietnam_provinces |>
   left_join(vnt, by = "province") |>
   ggplot(aes(fill = rsq)) +
@@ -27,7 +31,6 @@ vnt_pc <- pca.fd(c(vnt$t_max), nharm = 5)
 pairs(vnt_pc$scores)
 mvn(vnt_pc$scores, mvnTest = "mardia")
 ```
-
 
 ## Homogeneity of variances {.appendix .unnumbered}
 
