@@ -15,9 +15,11 @@ warning: false
 format:
   html:
     theme: cosmo
-    fig-format: svg
     code-fold: true
     css: styles.css
+    execute:
+      echo: true
+    fig-format: jpeg
     include-in-header:
       text: |
         <script defer data-domain="camillemondon.com" src="https://analytics.mondon.xyz/js/script.js"></script>
