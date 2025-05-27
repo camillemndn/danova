@@ -14,7 +14,7 @@ vnt |>
 ```
 
 ```{r fig-rsq-map}
-#| fig-cap: $R^2 = \frac{\sum_t \| \varepsilon (t) \|^2}{\sum_t \| y(t) - \overline y (t) \|^2}$.
+#| fig-cap: $R^2 = 1 - \frac{\sum_t \| \varepsilon (t) \|^2}{\sum_t \| y(t) - \overline y (t) \|^2}$.
 vietnam_provinces |>
   left_join(vnt, by = "province") |>
   ggplot(aes(fill = rsq)) +

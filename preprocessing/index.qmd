@@ -24,10 +24,27 @@ data(vietnam_temperature_dd)
 data(vietnam_regions)
 data(vietnam_provinces)
 
+lat_order_code <- c("NMM", "RRD", "NCC", "CHR", "SR", "MDR")
+lat_order <- c(
+  "Northern Midlands and Mountains",
+  "Red River Delta",
+  "North Central Coast",
+  "Central Highlands",
+  "Southeast",
+  "Mekong Delta"
+)
+vietnam_regions$name <- factor(vietnam_regions$name, levels = lat_order)
+vietnam_regions$code <- factor(vietnam_regions$code, levels = lat_order_code)
+vietnam_temperature_dd$region <- factor(vietnam_temperature_dd$region,
+  levels = lat_order_code
+)
+
 vietnam_provinces |>
   left_join(vietnam_regions, by = c("region" = "code")) |>
   rename(region_name = name) |>
   ggplot(aes(fill = region_name)) +
+  scale_fill_viridis_d() +
+  theme_legend_inside +
   geom_sf() +
   scale_x_continuous(breaks = seq(from = -180, to = 180, by = 2)) +
   labs(x = "Longitude", y = "Latitude", fill = "Region")
@@ -43,13 +60,14 @@ vntry <- vietnam_temperature_dd |>
   rename(region_name = name) |>
   arrange(region, province) |>
   select(!province) |>
-  group_by(region_name, year) |>
+  group_by(region, region_name, year) |>
   summarise(t_max = mean(t_max))
 
 vntry |> plot_funs(t_max, color = region_name, linewidth = year, alpha = year) +
-  facet_grid(vars(str_wrap(region_name, 14)), scales = "free_y") +
-  scale_linewidth(range = c(0.2, 2)) +
-  theme_legend_inside +
+  facet_grid(vars(region)) +
+  scale_linewidth(range = c(0.1, 1.2)) +
+  scale_color_viridis_d() +
+  theme(legend.position = "none") +
   labs(
     x = "Temperature (deg. Celsius)",
     y = "Density",
@@ -92,8 +110,8 @@ to_trend <- function(ddobj, t = seq_len(ncol(ddobj$coefs))) {
 
   trend <- dd(clr = fd(trend$coefs, trend$basis))
   attr(trend, "rsq") <- 1 - ssr / sst
-  attr(trend, "ssr_evol") <- data.frame(t = t, ssr = ssr_evol/sst_evol)
-  trend 
+  attr(trend, "ssr_evol") <- data.frame(t = t, ssr = ssr_evol / sst_evol)
+  trend
 }
 
 vnt <- vietnam_temperature_dd |>
@@ -110,12 +128,12 @@ vnt <- vietnam_temperature_dd |>
 class(vnt$t_max) <- c("ddl", "fdl", "list")
 
 vnt |> plot_funs(t_max, color = region_name) +
-  facet_grid(vars(str_wrap(region_name, 14)), scales = "free_y") +
-  theme(legend.position = "none", axis.title.y = element_text(angle = -90)) +
+  facet_grid(vars(region)) +
+  scale_color_viridis_d() +
+  theme(legend.position = "none") +
   geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
   labs(
     x = "Temperature (deg. Celsius)",
-    y = "Density",
-    color = "Region"
+    y = "Density"
   )
 ```

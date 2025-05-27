@@ -2,7 +2,6 @@ project:
   type: manuscript
 
 bibliography: references.bib
-cache: true
 citation: true
 df-print: kable
 lang: en

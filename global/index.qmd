@@ -7,6 +7,7 @@
 #| fig-cap:
 #|  - Mean annual trend of the maximum temperature distributions between 1987 and 2016.
 #|  - Centered log-ratio transform of the mean annual trend of maximum temperature distributions between 1987 and 2016.
+#| fig-height: 3
 
 vnt |>
   pull(t_max) |>
@@ -96,17 +97,18 @@ provinces equal to the Bayes neutral element $\pi_0$" ?
 #| fig-cap: Regional mean trend and overall trend.
 vntr <- vnt |>
   select(!province) |>
-  group_by(region_name) |>
+  group_by(region, region_name) |>
   summarise(t_max = mean(t_max))
 
 vntr |> plot_funs(t_max, color = region_name) +
   geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
   geom_function(fun = function(x) eval(mean(c(vnt$t_max)), x), color = "black", linetype = "dotted", linewidth = 1) +
-  theme_legend_inside +
+  facet_grid(vars(region)) +
+  scale_color_viridis_d() +
+  theme(legend.position = "none") +
   labs(
     x = "Temperature (deg. Celsius)",
-    y = "Density",
-    color = "Region"
+    y = "Density"
   )
 ```
 

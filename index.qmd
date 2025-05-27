@@ -83,11 +83,10 @@ citation:
 
 # To-do
 
-- Compute min (or mean) R^2 of density-on-time regression
 - One sample test (global and per region?)
 - Plots of globally-centred regional means
 - Plots of trends with thresholds to interpret using odds ratios (grouped by South/Center/RRD)
-- Order plots per latitude (change color gradient)
+- Order plots per latitude (change color gradient) and show transparent curves around means.
 
 
 # Framework and notations
