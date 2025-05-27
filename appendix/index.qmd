@@ -10,11 +10,12 @@ vnt |>
   ggplot(aes(t, ssr, color = region, group = province)) +
   geom_point() +
   geom_line() +
-  facet_wrap(vars(region))
+  facet_grid(vars(region))
 ```
 
 ```{r fig-rsq-map}
 #| fig-cap: $R^2 = 1 - \frac{\sum_t \| \varepsilon (t) \|^2}{\sum_t \| y(t) - \overline y (t) \|^2}$.
+#| fig-height: 9
 vietnam_provinces |>
   left_join(vnt, by = "province") |>
   ggplot(aes(fill = rsq)) +

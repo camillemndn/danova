@@ -4,16 +4,17 @@
 
 
 ```{r fig-trends_mean}
-#| fig-cap:
+#| fig-subcap:
 #|  - Mean annual trend of the maximum temperature distributions between 1987 and 2016.
 #|  - Centered log-ratio transform of the mean annual trend of maximum temperature distributions between 1987 and 2016.
 #| fig-height: 3
-
+#| layout-ncol: 2
 vnt |>
   pull(t_max) |>
   mean() |>
   plot() +
   geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), color = "red", linetype = "dotted") +
+  scale_y_continuous(n.breaks = 4) +
   labs(
     x = "Temperature (deg. Celsius)",
     y = "Density"
@@ -24,6 +25,7 @@ vnt |>
   mean() |>
   as.fd() |>
   plot() +
+  scale_y_continuous(n.breaks = 4) +
   labs(
     x = "Temperature (deg. Celsius)",
     y = "clr"
@@ -102,9 +104,9 @@ vntr <- vnt |>
 
 vntr |> plot_funs(t_max, color = region_name) +
   geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
-  geom_function(fun = function(x) eval(mean(c(vnt$t_max)), x), color = "black", linetype = "dotted", linewidth = 1) +
-  facet_grid(vars(region)) +
+  facet_grid(vars(region), axes = "all") +
   scale_color_viridis_d() +
+  scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   labs(
     x = "Temperature (deg. Celsius)",

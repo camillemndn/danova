@@ -3,7 +3,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   warning = FALSE,
   dpi = 300,
-  fig.height = 12,
+  fig.height = 14,
   fig.width = 5,
   dev.args = list(bg = "white")
 )
