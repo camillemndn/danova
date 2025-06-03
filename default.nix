@@ -55,6 +55,7 @@ let
   r-deps = with pkgs.rPackages; [
     fda_usc
     boot
+    CompQuadForm
     dda
     fdANOVA
     MVN
