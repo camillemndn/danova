@@ -83,10 +83,9 @@ citation:
 
 # To-do
 
-- One sample test (global and per region?)
-- Plots of globally-centred regional means
-- Plots of trends with thresholds to interpret using odds ratios (grouped by South/Center/RRD)
-- Order plots per latitude (change color gradient) and show transparent curves around means.
+- Plot globally-centred regional means
+- Plot trends with thresholds to interpret using odds ratios (grouped by South/Center/RRD)
+- Show transparent curves around means.
 
 
 # Framework and notations

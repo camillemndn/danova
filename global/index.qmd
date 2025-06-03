@@ -88,28 +88,35 @@ allows to answer the question: "are the mean trend densities in the
 provinces equal to the Bayes neutral element $\pi_0$" ?
 
 ```{r tbl-one_sample}
-n <- length(vnt$t_max)
-vnt_pca <- pca.fd(c(vnt$t_max), nharm = 12)
-lambda <- vnt_pca$values
-scores <- vnt_pca$scores
-v <- vnt_pca$harmonics
+#| tbl-cap: Test statistics and p-values for the global one-sample problem.
 
-# PC test
-tpc <- n * sum(inprod(v[1:3], vnt_mean)^2 / lambda[1:3])
-tpc_pval <- pchisq(tpc, 3, lower.tail = FALSE)
+one_sample <- function(ddobj, p = 3) {
+  n <- ncol(ddobj$coefs)
+  d <- nrow(ddobj$coefs)
 
-# Norm test
-tnorm <- n * sum(inprod(v[lambda[1:12] > 0], vnt_mean)^2)
-tnorm_pval <- imhof(tnorm, lambda[lambda[1:12] > 0])[[1]]
+  pca_fit <- pca.fd(ddobj, nharm = d)
+  lambda <- pca_fit$values
+  scores <- pca_fit$scores
+  v <- pca_fit$harmonics
 
-one_sample_tbl <- tibble(
-  Name = c("PC", "Norm"),
-  Statistic = c(tpc, tnorm),
-  `p-value` = c(tpc_pval, tnorm_pval)
-)
+  # PC test
+  tpc <- n * sum(inprod(v[1:p], mean(ddobj))^2 / lambda[1:p])
+  tpc_pval <- pchisq(tpc, p, lower.tail = FALSE)
 
-kable_format(one_sample_tbl)
+  # Norm test
+  tnorm <- n * sum(inprod(v[lambda[1:d] > 0], mean(ddobj))^2)
+  tnorm_pval <- imhof(tnorm, lambda[lambda[1:d] > 0])[[1]]
+
+  one_sample_tbl <- tibble(
+    Name = c("PC", "Norm"),
+    Statistic = c(tpc, tnorm),
+    `p-value` = c(tpc_pval, tnorm_pval)
+  )
+}
+
+kable_format(one_sample(c(vnt$t_max)))
 ```
+
 
 ## Distributional ANOVA
 
@@ -229,6 +236,7 @@ which all conclude that there is a difference in the way the regionial
 temperature densities evolve in time.
 
 ```{r tbl-trends_danova_global}
+#| tbl-cap: Test statistics and p-values for DANOVA.
 #| warning: false
 
 vnte <- vnt |>
@@ -259,6 +267,29 @@ danova_tbl <- res[as_vector(stat_list)] |>
   rownames_to_column("Name")
 
 kable_format(danova_tbl)
+```
+
+## One-sample problem for each group
+
+```{r tbl-one_sample_regional}
+#| tbl-cap: Šidák-adjusted $p$-values for the regional one-sample problems.
+
+one_sample_regional_tbl <- vnt |>
+  select(region, region_name, t_max) |>
+  summarise(t_max = list(c(t_max)), .by = c(region, region_name)) |>
+  rowwise() |>
+  mutate(res = list(one_sample(t_max))) |>
+  unnest(res) |>
+  select(region, Name, `p-value`) |>
+  pivot_wider(names_from = Name, values_from = `p-value`)
+
+multiple_testing <- function(tbl, m) {
+  mutate(tbl, across(where(is.numeric), ~ 1 - (1 - .x)^m))
+}
+
+kable_format(multiple_testing(one_sample_regional_tbl,
+  m = nrow(one_sample_regional_tbl)
+))
 ```
 
 ## Pairwise comparisons
@@ -294,6 +325,7 @@ la comparaison.
 ### Application: regional changes in temperature distribution over the period 1987-2016
 
 ```{r tbl-trends_danova_pairwise}
+#| tbl-cap: Šidák-adjusted $p$-values for pairwise comparisons.
 vntp <- t(combn(c("NMM", "RRD", "NCC", "CHR", "SR", "MDR"), m = 2))
 colnames(vntp) <- c("region1", "region2")
 
