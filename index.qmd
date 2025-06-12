@@ -83,8 +83,7 @@ citation:
 
 # To-do
 
-- Plot globally-centred regional means
-- Plot trends with thresholds to interpret using odds ratios (grouped by South/Center/RRD)
+- Plot slopes with thresholds to interpret using odds ratios (grouped by South/Center/RRD)
 - Show transparent curves around means.
 
 

@@ -93,6 +93,7 @@ rec {
       (rWrapper.override { packages = r-deps; })
       texliveFull
       librsvg
+      chromium
     ];
     shellHook = ''
       ${pre-commit-hook.shellHook}
@@ -103,6 +104,7 @@ rec {
     website = pkgs.callPackage (
       {
         stdenv,
+        chromium,
         image_optim,
         quarto,
         texliveFull,
@@ -115,6 +117,7 @@ rec {
         src = builtins.fetchGit ./.;
 
         buildInputs = [
+          chromium
           image_optim
           (quarto.override { extraRPackages = r-deps; })
           texliveFull

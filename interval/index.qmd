@@ -13,8 +13,6 @@ We focus on subintervals $I \subset (a,b)$ and wish to make assessments
 about the time evolution of the relative probability to be in one
 interval versus the other.
 
-### Application: global change in temperature distribution over the period 1987-2016
-
 We can rely on Maier et al. (2024), see pages 10 and 11, proposition
 3.1, for the definition of the infinitesimal odds-ratios and their
 interpretation. The objective is to compare two densities at two
@@ -41,7 +39,133 @@ than the probability of being close to $x$ than to $z$ at time $t'.$
 Note that when $t>t'$ $\operatorname{OR}^{x\mid z}_{t\mid t'} >1$ is
 equivalent to $\beta_{gi}(x) > \beta_{gi}(z)$.
 
+### Application: global change in temperature distribution over the period 1987-2016
+
+```{r fig-interval_global}
+#| fig-cap: Global trend.
+#| fig-height: 3
+
+fmin <- function(...) UseMethod("fmin")
+fmax <- function(...) UseMethod("fmax")
+fargmin <- function(...) UseMethod("fargmin")
+fargmax <- function(...) UseMethod("fargmax")
+
+fmin.fdl <- function(...) fmin(c(...))
+fmax.fdl <- function(...) fmax(c(...))
+fargmin.fdl <- function(...) fargmin(c(...))
+fargmax.fdl <- function(...) fargmax(c(...))
+
+fmin.fd <- function(fdobj,
+                    a = min(fdobj$basis$rangeval),
+                    b = max(fdobj$basis$rangeval)) {
+  f <- function(x) eval(fdobj, x)
+  results <- lapply(
+    seq_along(f(a)),
+    function(i) optimize(function(x) f(x)[i], interval = c(a, b))
+  )
+  sapply(results, `[[`, "objective")
+}
+
+fargmin.fd <- function(fdobj,
+                       a = min(fdobj$basis$rangeval),
+                       b = max(fdobj$basis$rangeval)) {
+  f <- function(x) eval(fdobj, x)
+  results <- lapply(
+    seq_along(f(a)),
+    function(i) optimize(function(x) f(x)[i], interval = c(a, b))
+  )
+  sapply(results, `[[`, "minimum")
+}
+
+fmax.fd <- function(fdobj,
+                    a = min(fdobj$basis$rangeval),
+                    b = max(fdobj$basis$rangeval)) {
+  f <- function(x) -eval(fdobj, x)
+  results <- lapply(
+    seq_along(f(a)),
+    function(i) optimize(function(x) f(x)[i], interval = c(a, b))
+  )
+  -sapply(results, `[[`, "objective")
+}
+
+fargmax.fd <- function(fdobj,
+                       a = min(fdobj$basis$rangeval),
+                       b = max(fdobj$basis$rangeval)) {
+  f <- function(x) -eval(fdobj, x)
+  results <- lapply(
+    seq_along(f(a)),
+    function(i) optimize(function(x) f(x)[i], interval = c(a, b))
+  )
+  sapply(results, `[[`, "minimum")
+}
+
+fargmax(vnt_mean)
+
+plot(mean(vnt$t_max)) +
+  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
+  geom_hline(yintercept = 0.038, color = "red") +
+  scale_y_continuous(n.breaks = 4) +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density"
+  )
+```
+
+
 ## Regional trends
 
 ### Application: regional changes in temperature distribution over the period 1987-2016
 
+```{r fig-interval_mountains}
+#| fig-cap: Mountainous regions.
+#| fig-height: 10
+vntr |>
+  filter(region %in% c("NMM", "NCC", "CHR")) |>
+  plot_funs(t_max) +
+  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
+  geom_hline(yintercept = 0.038, color = "red") +
+  facet_grid(vars(region), axes = "all") +
+  scale_color_viridis_d() +
+  scale_y_continuous(n.breaks = 4) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density"
+  )
+```
+
+```{r fig-interval_rrd}
+#| fig-cap: The particular case of the Red River delta.
+#| fig-height: 3
+vntr |>
+  filter(region == "RRD") |>
+  plot_funs(t_max) +
+  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
+  geom_hline(yintercept = 0.038, color = "red") +
+  facet_grid(vars(region), axes = "all") +
+  scale_color_viridis_d() +
+  scale_y_continuous(n.breaks = 4) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density"
+  )
+```
+
+```{r fig-interval_south}
+#| fig-cap: Southern regions.
+#| fig-height: 7
+vntr |>
+  filter(region %in% c("SR", "MDR")) |>
+  plot_funs(t_max) +
+  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
+  geom_hline(yintercept = 0.038, color = "red") +
+  facet_grid(vars(region), axes = "all") +
+  scale_color_viridis_d() +
+  scale_y_continuous(n.breaks = 4) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density"
+  )
+```

@@ -3,10 +3,10 @@
 ## One-sample problem
 
 
-```{r fig-trends_mean}
+```{r fig-slopes_mean}
 #| fig-subcap:
-#|  - Mean annual trend of the maximum temperature distributions between 1987 and 2016.
-#|  - Centered log-ratio transform of the mean annual trend of maximum temperature distributions between 1987 and 2016.
+#|  - Mean annual slope of the maximum temperature distributions between 1987 and 2016.
+#|  - Centered log-ratio transform of the mean annual slope of maximum temperature distributions between 1987 and 2016.
 #| fig-height: 3
 #| layout-ncol: 2
 vnt_mean <- mean(c(vnt$t_max))
@@ -80,15 +80,15 @@ use the norm approach otherwise.
 ### Application: changes in temperature distribution over the period 1987-2016
 
 Changes in temperature distributions will be measured through linear
-trends by province.
+slopes by province.
 
-We perform the one-sample test for the trend sample of $\beta_{gi},$ and
+We perform the one-sample test for the slope sample of $\beta_{gi},$ and
 $\pi_0$ equal to the neutral element (uniform density on $(a,b).$ it
-allows to answer the question: "are the mean trend densities in the
+allows to answer the question: "are the mean slope densities in the
 provinces equal to the Bayes neutral element $\pi_0$" ?
 
 ```{r tbl-one_sample}
-#| tbl-cap: Test statistics and p-values for the global one-sample problem.
+#| tbl-cap: Test statistics and $p$-values for the global one-sample problem.
 
 one_sample <- function(ddobj, p = 3) {
   n <- ncol(ddobj$coefs)
@@ -121,8 +121,8 @@ kable_format(one_sample(c(vnt$t_max)))
 ## Distributional ANOVA
 
 
-```{r fig-trends_regional_means}
-#| fig-cap: Regional mean trend and overall trend.
+```{r fig-slopes_regional_means}
+#| fig-cap: Regional mean slope and overall slope.
 vntr <- vnt |>
   select(!province) |>
   group_by(region, region_name) |>
@@ -137,6 +137,26 @@ vntr |> plot_funs(t_max, color = region_name) +
   labs(
     x = "Temperature (deg. Celsius)",
     y = "Density"
+  )
+```
+
+```{r fig-slopes_regional_means_centered}
+#| fig-cap: Regional mean slope, centered by the global mean.
+#| fig-height: 3
+vntr <- vnt |>
+  select(!province) |>
+  mutate(t_max = center(t_max)) |>
+  group_by(region, region_name) |>
+  summarise(t_max = mean(t_max), .groups = "drop") |>
+  mutate(t_max = as.fd(t_max))
+
+vntr |> plot_funs(t_max, color = region_name) +
+  scale_color_viridis_d() +
+  scale_y_continuous(n.breaks = 4) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Centered log-ratio transform"
   )
 ```
 
@@ -228,15 +248,15 @@ more powerful than the F-type tests (page 5).
 ### Application: regional changes in temperature distribution over the period 1987-2016
 
 $\pi_{git}$ maximum daily temperature density f for year $t$. We first
-apply for each province the trend estimation and obtain the set of trend
-densities $\beta_{gi=}.$ Then we test whether these trend densities vary
+apply for each province the slope estimation and obtain the set of slope
+densities $\beta_{gi=}.$ Then we test whether these slope densities vary
 across regions. Table [1](#tab:my_label){reference-type="ref"
 reference="tab:my_label"} summarizes the results for the above tests
 which all conclude that there is a difference in the way the regionial
 temperature densities evolve in time.
 
-```{r tbl-trends_danova_global}
-#| tbl-cap: Test statistics and p-values for DANOVA.
+```{r tbl-slopes_danova_global}
+#| tbl-cap: Test statistics and $p$-values for DANOVA.
 #| warning: false
 
 vnte <- vnt |>
@@ -272,7 +292,7 @@ kable_format(danova_tbl)
 ## One-sample problem for each group
 
 ```{r tbl-one_sample_regional}
-#| tbl-cap: Šidák-adjusted $p$-values for the regional one-sample problems.
+#| tbl-cap: Sidak-adjusted $p$-values for the regional one-sample problems.
 
 one_sample_regional_tbl <- vnt |>
   select(region, region_name, t_max) |>
@@ -324,8 +344,8 @@ la comparaison.
 
 ### Application: regional changes in temperature distribution over the period 1987-2016
 
-```{r tbl-trends_danova_pairwise}
-#| tbl-cap: Šidák-adjusted $p$-values for pairwise comparisons.
+```{r tbl-slopes_danova_pairwise}
+#| tbl-cap: Sidak-adjusted $p$-values for pairwise comparisons.
 vntp <- t(combn(c("NMM", "RRD", "NCC", "CHR", "SR", "MDR"), m = 2))
 colnames(vntp) <- c("region1", "region2")
 
@@ -356,4 +376,26 @@ pairwise_tbl <- as_tibble(vntp) |>
   unnest_wider(res)
 
 kable_format(multiple_testing(pairwise_tbl, m = nrow(pairwise_tbl)))
+```
+
+```{mermaid}
+%%| label: fig-slopes_danova_pairwise_diagram
+%%| fig-cap: Summary of pairwise tests.
+flowchart TB
+  NMM([NMM]) ~~~ MDR([MDR])
+  NMM <-.-> SR([SR])
+  NMM <--> CHR([CHR]) <--> SR
+  NMM <-.-> RRD([RRD]) <-.-> CHR
+  RRD <-.-> NCC
+  NCC <--> CHR
+  NMM <--> NCC([NCC]) <--> SR
+  SR <-.-> MDR
+  NMM ~~~ MDR([MDR])
+
+style NMM fill:#440053,color:#fff,stroke:#000
+style RRD fill:#414487,color:#fff,stroke:#000
+style NCC fill:#2B778E,stroke:#000
+style CHR fill:#22A885,stroke:#000
+style SR fill:#7AD051,stroke:#000
+style MDR fill:#FDE624,stroke:#000
 ```
