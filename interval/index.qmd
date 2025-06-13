@@ -55,6 +55,9 @@ fmax.fdl <- function(...) fmax(c(...))
 fargmin.fdl <- function(...) fargmin(c(...))
 fargmax.fdl <- function(...) fargmax(c(...))
 
+fsolve <- function(...) UseMethod("fsolve")
+fsolve.fdl <- function(...) fargmax(c(...))
+
 fmin.fd <- function(fdobj,
                     a = min(fdobj$basis$rangeval),
                     b = max(fdobj$basis$rangeval)) {
@@ -99,12 +102,44 @@ fargmax.fd <- function(fdobj,
   sapply(results, `[[`, "minimum")
 }
 
-fargmax(vnt_mean)
+fsolve.fd <- function(fdobj, k,
+                      a = min(fdobj$basis$rangeval),
+                      b = max(fdobj$basis$rangeval)) {
+  f <- function(x) eval(fdobj, x) - k
+  results <- lapply(
+    seq_along(f(a)),
+    function(i) uniroot(function(x) f(x)[i], interval = c(a, b))
+  )
+  sapply(results, `[[`, "root")
+}
 
-plot(mean(vnt$t_max)) +
-  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
-  geom_hline(yintercept = 0.038, color = "red") +
+thres2 <- 0.5 * (fmax(vnt_mean, 25, 30) + fmin(vnt_mean, 20, 25))
+
+vnt_mean_thresholds <- tibble(
+  x = c(
+    fsolve(vnt_mean, fmax(vnt_mean, 25, 30), 15, 20),
+    fsolve(vnt_mean, thres2, 15, 22),
+    fsolve(vnt_mean, thres2, 22, 30),
+    fsolve(vnt_mean, thres2, 30, 35),
+    fsolve(vnt_mean, fmin(vnt_mean, 20, 25), 30, 35)
+  ),
+  y = c(
+    fmax(vnt_mean, 25, 30),
+    thres2,
+    thres2,
+    thres2,
+    fmin(vnt_mean, 20, 25)
+  )
+)
+
+vnt_mean_thresholds |> signif(3)
+
+plot(vnt_mean) +
+  geom_hline(data = vnt_mean_thresholds, aes(yintercept = y, color = y, linetype = -y)) +
+  geom_vline(data = vnt_mean_thresholds, aes(xintercept = x, color = y, linetype = -y)) +
+  scale_linetype_binned() +
   scale_y_continuous(n.breaks = 4) +
+  theme(legend.position = "none") +
   labs(
     x = "Temperature (deg. Celsius)",
     y = "Density"
