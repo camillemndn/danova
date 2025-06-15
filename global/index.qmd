@@ -143,14 +143,13 @@ vntr |> plot_funs(t_max, color = region_name) +
 ```{r fig-slopes_regional_means_centered}
 #| fig-cap: Regional mean slope, centered by the global mean.
 #| fig-height: 3
-vntr <- vnt |>
+vnt |>
   select(!province) |>
   mutate(t_max = center(t_max)) |>
   group_by(region, region_name) |>
   summarise(t_max = mean(t_max), .groups = "drop") |>
-  mutate(t_max = as.fd(t_max))
-
-vntr |> plot_funs(t_max, color = region_name) +
+  mutate(t_max = as.fd(t_max)) |>
+  plot_funs(t_max, color = region_name) +
   scale_color_viridis_d() +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +

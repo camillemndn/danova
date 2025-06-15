@@ -113,21 +113,21 @@ fsolve.fd <- function(fdobj, k,
   sapply(results, `[[`, "root")
 }
 
-thres2 <- 0.5 * (fmax(vnt_mean, 25, 30) + fmin(vnt_mean, 20, 25))
+thres0 <- 0.5 * (fmax(vnt_mean, 25, 30) + fmin(vnt_mean, 20, 25))
 
 vnt_mean_thresholds <- tibble(
   x = c(
     fsolve(vnt_mean, fmax(vnt_mean, 25, 30), 15, 20),
-    fsolve(vnt_mean, thres2, 15, 22),
-    fsolve(vnt_mean, thres2, 22, 30),
-    fsolve(vnt_mean, thres2, 30, 35),
+    fsolve(vnt_mean, thres0, 15, 22),
+    fsolve(vnt_mean, thres0, 22, 30),
+    fsolve(vnt_mean, thres0, 30, 35),
     fsolve(vnt_mean, fmin(vnt_mean, 20, 25), 30, 35)
   ),
   y = c(
     fmax(vnt_mean, 25, 30),
-    thres2,
-    thres2,
-    thres2,
+    thres0,
+    thres0,
+    thres0,
     fmin(vnt_mean, 20, 25)
   )
 )
@@ -135,8 +135,8 @@ vnt_mean_thresholds <- tibble(
 vnt_mean_thresholds |> signif(3)
 
 plot(vnt_mean) +
-  geom_hline(data = vnt_mean_thresholds, aes(yintercept = y, color = y, linetype = -y)) +
   geom_vline(data = vnt_mean_thresholds, aes(xintercept = x, color = y, linetype = -y)) +
+  geom_hline(data = vnt_mean_thresholds, aes(yintercept = y, color = y, linetype = -y)) +
   scale_linetype_binned() +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
@@ -154,13 +154,52 @@ plot(vnt_mean) +
 ```{r fig-interval_mountains}
 #| fig-cap: Mountainous regions.
 #| fig-height: 10
+thres1 <- 0.5 * (fmax(vntr$t_max[[1]], 30, 35) + fmin(vntr$t_max[[1]], 20, 30))
+thres3 <- 0.5 * (fmax(vntr$t_max[[3]], 30, 35) + fmin(vntr$t_max[[3]], 20, 30))
+
+vnt_mountains_thresholds <- rbind(tibble(
+  region = "NMM",
+  x = c(
+    fsolve(vntr$t_max[[1]], fmax(vntr$t_max[[1]], 30, 35), 20, 25),
+    fsolve(vntr$t_max[[1]], thres1, 20, 25),
+    fsolve(vntr$t_max[[1]], thres1, 25, 30),
+    fsolve(vntr$t_max[[1]], thres1, 30, 35),
+    fsolve(vntr$t_max[[1]], fmin(vntr$t_max[[1]], 20, 30), 30, 35)
+  ),
+  y = c(
+    fmax(vntr$t_max[[1]], 30, 35),
+    thres1,
+    thres1,
+    thres1,
+    fmin(vntr$t_max[[1]], 20, 30)
+  )
+), tibble(
+  region = "NCC",
+  x = c(
+    fsolve(vntr$t_max[[3]], fmax(vntr$t_max[[3]], 30, 35), 15, 25),
+    fsolve(vntr$t_max[[3]], thres3, 20, 25),
+    fsolve(vntr$t_max[[3]], thres3, 25, 30),
+    fsolve(vntr$t_max[[3]], thres3, 30, 35),
+    fsolve(vntr$t_max[[3]], fmin(vntr$t_max[[3]], 25, 30), 30, 35)
+  ),
+  y = c(
+    fmax(vntr$t_max[[3]], 30, 35),
+    thres3,
+    thres3,
+    thres3,
+    fmin(vntr$t_max[[3]], 25, 30)
+  )
+))
+
+vnt_mountains_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
+
 vntr |>
-  filter(region %in% c("NMM", "NCC", "CHR")) |>
+  filter(region %in% c("NMM", "NCC")) |>
   plot_funs(t_max) +
-  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
-  geom_hline(yintercept = 0.038, color = "red") +
+  geom_vline(data = vnt_mountains_thresholds, aes(xintercept = x, color = y, linetype = -y)) +
+  geom_hline(data = vnt_mountains_thresholds, aes(yintercept = y, color = y, linetype = -y)) +
   facet_grid(vars(region), axes = "all") +
-  scale_color_viridis_d() +
+  scale_linetype_binned() +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   labs(
@@ -172,13 +211,43 @@ vntr |>
 ```{r fig-interval_rrd}
 #| fig-cap: The particular case of the Red River delta.
 #| fig-height: 3
+vnt_rrd_thresholds <- rbind(tibble(
+  region = "RRD",
+  x = c(
+    fsolve(vntr$t_max[[2]], fmax(vntr$t_max[[2]], 12, 15), 35, 37),
+    fsolve(vntr$t_max[[2]], fmax(vntr$t_max[[2]], 12, 15), 37, 40),
+    fsolve(vntr$t_max[[2]], fmin(vntr$t_max[[2]], 37, 40), 15, 20),
+    fsolve(vntr$t_max[[2]], fmin(vntr$t_max[[2]], 37, 40), 30, 35)
+  ),
+  y = c(
+    fmax(vntr$t_max[[2]], 12, 15),
+    fmax(vntr$t_max[[2]], 12, 15),
+    fmin(vntr$t_max[[2]], 37, 40),
+    fmin(vntr$t_max[[2]], 37, 40)
+  )
+), tibble(
+  region = "CHR",
+  x = c(
+    fsolve(vntr$t_max[[4]], fmax(vntr$t_max[[4]], 20, 30), 35, 40),
+    fsolve(vntr$t_max[[4]], fmin(vntr$t_max[[4]], 30, 40), 15, 20),
+    fsolve(vntr$t_max[[4]], fmin(vntr$t_max[[4]], 30, 40), 20, 25)
+  ),
+  y = c(
+    fmax(vntr$t_max[[4]], 20, 30),
+    fmin(vntr$t_max[[4]], 30, 40),
+    fmin(vntr$t_max[[4]], 30, 40)
+  )
+))
+
+vnt_rrd_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
+
 vntr |>
-  filter(region == "RRD") |>
+  filter(region %in% c("RRD", "CHR")) |>
   plot_funs(t_max) +
-  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
-  geom_hline(yintercept = 0.038, color = "red") +
+  geom_vline(data = vnt_rrd_thresholds, aes(xintercept = x, color = y, linetype = -y)) +
+  geom_hline(data = vnt_rrd_thresholds, aes(yintercept = y, color = y, linetype = -y)) +
   facet_grid(vars(region), axes = "all") +
-  scale_color_viridis_d() +
+  scale_linetype_binned() +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   labs(
@@ -190,13 +259,41 @@ vntr |>
 ```{r fig-interval_south}
 #| fig-cap: Southern regions.
 #| fig-height: 7
+vnt_south_thresholds <- rbind(tibble(
+  region = "SR",
+  x = c(
+    fsolve(vntr$t_max[[5]], fmax(vntr$t_max[[5]], 12, 20), 20, 25),
+    fsolve(vntr$t_max[[5]], fmax(vntr$t_max[[5]], 12, 20), 25, 30),
+    fsolve(vntr$t_max[[5]], fmin(vntr$t_max[[5]], 12, 25), 30, 35)
+  ),
+  y = c(
+    fmax(vntr$t_max[[5]], 12, 20),
+    fmax(vntr$t_max[[5]], 12, 20),
+    fmin(vntr$t_max[[5]], 12, 25)
+  )
+), tibble(
+  region = "MDR",
+  x = c(
+    fsolve(vntr$t_max[[6]], fmax(vntr$t_max[[6]], 12, 20), 25, 30),
+    fsolve(vntr$t_max[[6]], fmax(vntr$t_max[[6]], 12, 20), 30, 35),
+    fsolve(vntr$t_max[[6]], fmin(vntr$t_max[[6]], 12, 25), 30, 35)
+  ),
+  y = c(
+    fmax(vntr$t_max[[6]], 12, 20),
+    fmax(vntr$t_max[[6]], 12, 20),
+    fmin(vntr$t_max[[6]], 12, 25)
+  )
+))
+
+vnt_south_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
+
 vntr |>
   filter(region %in% c("SR", "MDR")) |>
   plot_funs(t_max) +
-  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
-  geom_hline(yintercept = 0.038, color = "red") +
+  geom_vline(data = vnt_south_thresholds, aes(xintercept = x, color = y, linetype = -y)) +
+  geom_hline(data = vnt_south_thresholds, aes(yintercept = y, color = y, linetype = -y)) +
   facet_grid(vars(region), axes = "all") +
-  scale_color_viridis_d() +
+  scale_linetype_binned() +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   labs(
