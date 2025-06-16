@@ -113,7 +113,7 @@ rec {
       }:
 
       stdenv.mkDerivation {
-        name = "camillemondon-icscomplex";
+        name = "camillemondon-danova";
         src = builtins.fetchGit ./.;
 
         buildInputs = [
@@ -127,7 +127,7 @@ rec {
         HOME = ".";
 
         buildPhase = ''
-          quarto render index.qmd
+          quarto render index.qmd --to html
           image_optim --recursive _manuscript
         '';
 

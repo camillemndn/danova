@@ -153,7 +153,7 @@ plot(vnt_mean) +
 
 ```{r fig-interval_mountains}
 #| fig-cap: Mountainous regions.
-#| fig-height: 10
+#| fig-height: 6
 thres1 <- 0.5 * (fmax(vntr$t_max[[1]], 30, 35) + fmin(vntr$t_max[[1]], 20, 30))
 thres3 <- 0.5 * (fmax(vntr$t_max[[3]], 30, 35) + fmin(vntr$t_max[[3]], 20, 30))
 
@@ -210,7 +210,7 @@ vntr |>
 
 ```{r fig-interval_rrd}
 #| fig-cap: The particular case of the Red River delta.
-#| fig-height: 3
+#| fig-height: 6
 vnt_rrd_thresholds <- rbind(tibble(
   region = "RRD",
   x = c(
@@ -258,7 +258,7 @@ vntr |>
 
 ```{r fig-interval_south}
 #| fig-cap: Southern regions.
-#| fig-height: 7
+#| fig-height: 6
 vnt_south_thresholds <- rbind(tibble(
   region = "SR",
   x = c(
