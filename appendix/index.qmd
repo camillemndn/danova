@@ -28,6 +28,7 @@ vietnam_provinces |>
 ## Normality assumption {.appendix .unnumbered}
 
 ```{r normality}
+#| eval: false
 vnt_pc <- pca.fd(c(vnt$t_max), nharm = 5)
 pairs(vnt_pc$scores)
 mvn(vnt_pc$scores, mvnTest = "mardia")

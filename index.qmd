@@ -123,7 +123,236 @@ citation:
     ${\cal B}^2(a,b)$ valued process $u_{gi}$ is defined as
     $\operatorname{Cov^B}(u)= \operatorname{Cov}(\operatorname{clr}(u)).$
 
-{{< include preprocessing/index.qmd >}}
+
+# Data description and preprocessing
+
+## Description
+
+```{r setup}
+#| include: false
+
+source("setup.R")
+```
+
+```{r fig-map}
+#| fig-cap: Map of Vietnam by region.
+#| fig-height: 9
+
+library(boot)
+library(CompQuadForm)
+library(dda)
+library(fdANOVA)
+library(fda.usc)
+library(MVN)
+library(sf)
+library(tidyverse)
+set.seed(10983)
+
+data(vietnam_temperature_dd)
+data(vietnam_regions)
+data(vietnam_provinces)
+
+lat_order_code <- c("NMM", "RRD", "NCC", "CHR", "SR", "MDR")
+lat_order <- c(
+  "Northern Midlands and Mountains",
+  "Red River Delta",
+  "North Central Coast",
+  "Central Highlands",
+  "Southeast",
+  "Mekong Delta"
+)
+vietnam_regions$name <- factor(str_wrap(vietnam_regions$name, 20), levels = str_wrap(lat_order, 20))
+vietnam_regions$code <- factor(vietnam_regions$code, levels = lat_order_code)
+vietnam_temperature_dd$region <- factor(vietnam_temperature_dd$region,
+  levels = lat_order_code
+)
+
+vietnam_provinces |>
+  left_join(vietnam_regions, by = c("region" = "code")) |>
+  rename(region_name = name) |>
+  ggplot(aes(fill = region_name)) +
+  scale_fill_viridis_d() +
+  theme_legend_inside +
+  geom_sf() +
+  scale_x_continuous(breaks = seq(from = -180, to = 180, by = 2)) +
+  labs(x = "Longitude", y = "Latitude", fill = "Region")
+```
+
+## Smoothing
+
+```{r fig-smoothing}
+#| fig-cap: Density of maximum temperature grouped per region.
+
+vntry <- vietnam_temperature_dd |>
+  left_join(vietnam_regions, by = c("region" = "code")) |>
+  rename(region_name = name) |>
+  arrange(region, province) |>
+  select(!province) |>
+  group_by(region, region_name, year) |>
+  summarise(t_max = mean(t_max))
+
+vntry |>
+  plot_funs(t_max, color = region_name, linewidth = year, alpha = year) +
+  facet_grid(vars(region), axes = "all") +
+  scale_linewidth(range = c(0.1, 1.2)) +
+  scale_y_continuous(n.breaks = 4) +
+  scale_color_viridis_d() +
+  theme(legend.position = "none") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density",
+    color = "Region"
+  )
+```
+
+## Trend estimation by province
+
+Here is one possible way to evaluate a time evolution in the population
+of temperature densities in the provinces of a given region (or of the
+whole Vietnam) which is more Bayes compatible than the previous one. Let
+us use a slightly different notation to indicate the time dependence.
+Let $\pi_{it}$ be the density in province $i, i=1,n$ at time $t, t=1,T$.
+We imagine a simple model where the densities in a fixed province $i$
+evolve linearly in time: $$\label{eq:slopereg}
+    \pi_{git}(x)= \alpha_{gi}(x) \oplus [t\odot \beta_{gi}(x)] \oplus \epsilon_{git},$$
+where $\beta_{gi}$ is the slope density for province $i$ in region $g$.
+
+In $L^2(a,b)$ the model for a given province writes
+$$\operatorname{clr}(\pi_{git})(x) =  \operatorname{clr}(\alpha_{gi})(x) + t \operatorname{clr}(\beta_{gi})(x) + \operatorname{clr}(\epsilon_{git})(x)$$
+
+```{r fig-slopes}
+#| fig-cap: Trends by province in each region.
+
+to_slope <- function(ddobj, t = seq_len(ncol(ddobj$coefs))) {
+  model <- lm(t(ddobj$coefs) ~ t)
+
+  # Density-on-scalar regression
+  slope <- ddobj
+  slope$coefs <- model$coefficients["t", ]
+
+  # Compute functional R^2
+  eps <- ddobj
+  eps$coefs <- t(model$residuals)
+  ssr_evol <- diag(inprod(eps, eps))
+  sst_evol <- diag(inprod(ddobj, ddobj))
+  ssr <- sum(ssr_evol)
+  sst <- sum(sst_evol)
+
+  slope <- dd(clr = fd(slope$coefs, slope$basis))
+  attr(slope, "rsq") <- 1 - ssr / sst
+  attr(slope, "ssr_evol") <- data.frame(t = t, ssr = ssr_evol / sst_evol)
+  slope
+}
+
+vnt <- vietnam_temperature_dd |>
+  group_by(region, province) |>
+  summarise(t_max = list(c(t_max)), .groups = "drop") |>
+  rowwise() |>
+  mutate(t_max = list(to_slope(t_max))) |>
+  mutate(rsq = attr(t_max, "rsq")) |>
+  mutate(ssr_evol = list(attr(t_max, "ssr_evol"))) |>
+  ungroup() |>
+  left_join(vietnam_regions, by = c("region" = "code")) |>
+  rename(region_name = name) |>
+  arrange(region, province)
+class(vnt$t_max) <- c("ddl", "fdl", "list")
+
+vnt |> plot_funs(t_max, color = region_name) +
+  facet_grid(vars(region), axes = "all") +
+  scale_color_viridis_d() +
+  scale_y_continuous(n.breaks = 4) +
+  theme(legend.position = "none") +
+  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density"
+  )
+```
+
+```{r fig-distance_matrices}
+library(sf)
+library(units)
+
+vnt_sdist <- vnt |>
+  left_join(select(vietnam_provinces,!region), by = "province") |>
+	st_as_sf() |>
+	st_distance() |>
+	set_units("km") |>
+	drop_units()
+
+ggplot(reshape2::melt(vnt_sdist), aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma") +
+  coord_fixed()
+
+fd_obj <- as.fd(c(vnt$t_max))
+n <- nrow(vnt)
+
+vnt_fdist <- matrix(0, n, n)
+for(i in 1:(n-1)){
+  for(j in (i+1):n){
+    diff_fd <- fd_obj[i] - fd_obj[j]
+    vnt_fdist[i,j] <- sqrt(inprod(diff_fd, diff_fd))
+    vnt_fdist[j,i] <- vnt_fdist[i,j]
+  }
+}
+
+ggplot(reshape2::melt(vnt_fdist), aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_viridis_c(option = "magma") +
+  coord_fixed()
+```
+
+```{r fig-trace-variogram}
+# Charger gstat
+library(gstat)
+library(dplyr)
+
+variogram_dist <- function(dist_mat, gamma_mat, cutoff = NULL, width = NULL) {
+  n <- nrow(dist_mat)
+  
+  # Check that both matrices are square and of the same size
+  if (!is.matrix(dist_mat) || !is.matrix(gamma_mat) ||
+      ncol(dist_mat) != n || nrow(gamma_mat) != n || ncol(gamma_mat) != n) {
+    stop("dist_mat and gamma_mat must be square matrices of the same size.")
+  }
+  
+  # Default cutoff and bin width similar to gstat
+  dmax <- max(dist_mat, na.rm = TRUE)
+  if (is.null(cutoff)) cutoff <- dmax / 3
+  if (is.null(width)) width <- cutoff / 15
+  
+  # Create bin breaks
+  breaks <- seq(0, cutoff, by = width)
+  if (tail(breaks, 1) < cutoff) breaks <- c(breaks, cutoff)
+  
+  # Extract upper-triangle indices (i < j)
+  idx <- which(upper.tri(dist_mat), arr.ind = TRUE)
+  d_ij <- dist_mat[idx]       # distances for each pair
+  gamma_ij <- gamma_mat[idx]  # precomputed semi-variances for each pair
+  
+  # Assign each pair to a bin
+  bin_id <- cut(d_ij, breaks = breaks, include.lowest = TRUE)
+  
+  # Compute mean gamma per bin
+  gamma_means <- tapply(gamma_ij, bin_id, mean, na.rm = TRUE)
+  npairs <- tapply(gamma_ij, bin_id, length)
+  
+  # Bin centers
+  bin_centers <- (head(breaks, -1) + tail(breaks, -1)) / 2
+  
+  # Return as data.frame
+  data.frame(
+    dist = bin_centers,
+    gamma = as.numeric(gamma_means),
+    np = as.numeric(npairs)
+  )
+}
+
+vg <- variogram_dist(vnt_sdist, vnt_fdist)
+plot(vg$dist, vg$gamma)
+```
+
 {{< include global/index.qmd >}}
 {{< include interval/index.qmd >}}
 {{< include conclusion/index.qmd >}}

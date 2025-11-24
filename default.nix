@@ -1,7 +1,6 @@
 let
-  inputs = import ./deps;
+  inputs = import ./lon.nix;
   system = "x86_64-linux";
-
   pkgs = import inputs.nixpkgs {
     inherit system;
     overlays = [
@@ -13,8 +12,8 @@ let
               src = pkgs.fetchFromGitHub {
                 owner = "camillemndn";
                 repo = "dda";
-                rev = "v0.0.0.9017";
-                hash = "sha256-MOQNNQgOZOss7zfCDy0oBzfOYYTs5zl6M/ltOdnYHvI=";
+                rev = "v0.0.0.9018";
+                hash = "sha256-ReqTqTTKJC9e0OVabLi9f5vXFZKVAHPQYaZ7rlIxUQU=";
               };
               propagatedBuildInputs = [
                 fda
@@ -25,27 +24,6 @@ let
                 memoise
               ];
             };
-
-            tidyfun = buildRPackage {
-              name = "tidyfun";
-              src = pkgs.fetchFromGitHub {
-                owner = "tidyfun";
-                repo = "tidyfun";
-                rev = "d9c4adbd2ff1179cc1f37cb34464e42f5fe2739a";
-                hash = "sha256-uSpwjZZ2+GZZpNn5PFwHfRal7o5MTd5rST8jKd6Kpdo=";
-              };
-              propagatedBuildInputs = [
-                tf
-                dplyr
-                GGally
-                ggplot2
-                pillar
-                purrr
-                tibble
-                tidyr
-                tidyselect
-              ];
-            };
           };
         };
       })
@@ -53,12 +31,14 @@ let
   };
 
   r-deps = with pkgs.rPackages; [
-    fda_usc
     boot
     CompQuadForm
     dda
+    fda_usc
     fdANOVA
+    gstat
     MVN
+    reshape2
     sf
     tidyverse
 
