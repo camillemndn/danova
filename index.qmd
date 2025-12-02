@@ -269,13 +269,798 @@ vnt |> plot_funs(t_max, color = region_name) +
   )
 ```
 
+# Global tests
+
+## One-sample problem
+
+
+```{r fig-slopes_mean}
+#| fig-subcap:
+#|  - Mean annual slope of the maximum temperature distributions between 1987 and 2016.
+#|  - Centered log-ratio transform of the mean annual slope of maximum temperature distributions between 1987 and 2016.
+#| fig-height: 3
+#| layout-ncol: 2
+vnt_mean <- mean(c(vnt$t_max))
+
+plot(vnt_mean) +
+  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
+  scale_y_continuous(n.breaks = 4) +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density"
+  )
+
+plot(as.fd(as.list(vnt_mean))) +
+  scale_y_continuous(n.breaks = 4) +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "clr"
+  )
+```
+
+Expliquer davantage l'implémentation (approximation chi-2 etc.) Zhang a
+partir de page 107.
+
+Inlcure graphique de la moyenne globale
+
+Here $G=1$ therefore we eliminate the index $g$ from previous notations.
+We are given a reference density $\pi_0.$ Of particular interest is the
+case $\pi_0$ is the null element of the Bayes space.
+
+### Test hypotheses
+
+$H_0: {\mathbb E}^B (\pi_i) = \pi_0, \forall i=1, \ldots n$. Because
+$${\mathbb E}^B (\pi_i) = \pi_0 \Leftrightarrow \operatorname{clr} {\mathbb E}^B (\pi_i) =  \operatorname{clr} \pi_0 \Leftrightarrow {\mathbb E} (\operatorname{clr} \pi_i) =  \operatorname{clr} \pi_0$$
+we may use one-sample test in $L^2$ space. Answers the question: "is the
+mean density equal to the reference $\pi_0$ ?"
+
+Local test for fixed $x$: $H_0: {\mathbb E}^B (\pi_i)(x) = \pi_0 (x)$?
+
+Two problems:
+
+-   $H_0: \mathbb{E}^B(\pi_1)(x) = \mathbb{E}^B(\pi_2)(x)$ for a given
+    point $x$ is not equivalent to
+    $\operatorname{clr}\mathbb{E}^B(\pi_1)(x) = \operatorname{clr}\mathbb{E}^B(\pi_2)(x)$
+    because the clr involves all x's therefore the Student statistic is
+    not appropriate.
+
+-   Meaning of pointwise hypotheses for a density function which is
+    defined almost everywhere ?? only makes sense on subintervals, we
+    would like to know on which ranges of $x$ the densities $\pi_i$
+    differ from $\pi_0$.
+
+### Test statistics
+
+Two options:
+
+-   Norm approach
+    $$T_\text{norm}= n \| \operatorname{clr} (\bar{\pi}_{..}) - \operatorname{clr} (\pi_0) \|^2_{L^2_0(a,b)}$$
+    Reference: [@kokoszka_introduction_2017]
+
+-   PC approach (Martin, report 7, page 13 et Kokotzka page 269)
+    Hotelling's T-square statistic based on functional PCA $T_{PC}.$
+    Given a truncation with $p$ terms
+    $$T_{PC} = n\sum_{k=1}^p \frac{\langle \operatorname{clr} (\bar{\pi}_{..}) - \operatorname{clr} (\pi_0), v_k \rangle_{L^2_0(a,b)}^2}{\hat \lambda_k,}$$
+    where $\lambda_k$ are the eigenvalues and $v_k$ the eigenfunctions
+    of FPCA.
+
+Comparison: Kokoszka recommends that the PC approach be used when a very
+small number of PCs explain a larger proportion of variability, and to
+use the norm approach otherwise.
+
+### Application: changes in temperature distribution over the period 1987-2016
+
+Changes in temperature distributions will be measured through linear
+slopes by province.
+
+We perform the one-sample test for the slope sample of $\beta_{gi},$ and
+$\pi_0$ equal to the neutral element (uniform density on $(a,b).$ it
+allows to answer the question: "are the mean slope densities in the
+provinces equal to the Bayes neutral element $\pi_0$" ?
+
+```{r tbl-one_sample}
+#| tbl-cap: Test statistics and $p$-values for the global one-sample problem.
+
+one_sample <- function(ddobj, p = 3) {
+  n <- ncol(ddobj$coefs)
+  d <- nrow(ddobj$coefs)
+
+  pca_fit <- pca.fd(ddobj, nharm = d)
+  lambda <- pca_fit$values
+  scores <- pca_fit$scores
+  v <- pca_fit$harmonics
+
+  # PC test
+  tpc <- n * sum(inprod(v[1:p], mean(ddobj))^2 / lambda[1:p])
+  tpc_pval <- pchisq(tpc, p, lower.tail = FALSE)
+
+  # Norm test
+  tnorm <- n * sum(inprod(v[lambda[1:d] > 0], mean(ddobj))^2)
+  tnorm_pval <- imhof(tnorm, lambda[lambda[1:d] > 0])[[1]]
+
+  one_sample_tbl <- tibble(
+    Name = c("PC", "Norm"),
+    Statistic = c(tpc, tnorm),
+    `p-value` = c(tpc_pval, tnorm_pval)
+  )
+}
+
+kable_format(one_sample(c(vnt$t_max)))
+```
+
+
+## Distributional ANOVA
+
+
+```{r fig-slopes_regional_means}
+#| fig-cap: Regional mean slope and overall slope.
+vntr <- vnt |>
+  select(!province) |>
+  group_by(region, region_name) |>
+  summarise(t_max = mean(t_max))
+
+vntr |> plot_funs(t_max, color = region_name) +
+  geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
+  facet_grid(vars(region), axes = "all") +
+  scale_color_viridis_d() +
+  scale_y_continuous(n.breaks = 4) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density"
+  )
+```
+
+```{r fig-slopes_regional_means_centered}
+#| fig-cap: Regional mean slope, centered by the global mean.
+#| fig-height: 3
+vnt |>
+  select(!province) |>
+  mutate(t_max = center(t_max)) |>
+  group_by(region, region_name) |>
+  summarise(t_max = mean(t_max), .groups = "drop") |>
+  mutate(t_max = as.fd(t_max)) |>
+  plot_funs(t_max, color = region_name) +
+  scale_color_viridis_d() +
+  scale_y_continuous(n.breaks = 4) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Centered log-ratio transform"
+  )
+```
+
+### Test hypotheses
+
+$H_0: \forall g \quad {\mathbb E}^B (\pi_{gi}) = {\mathbb E}^B (\pi_{1i})$
+equivalent to
+$H_0: \forall g \quad {\mathbb E} (\text{clr }\pi_{gi}) = {\mathbb E} (\text{clr }\pi_{1i})$
+
+[Chris: with the model definition of
+[\[eq:danova_model2\]](#eq:danova_model2){reference-type="eqref"
+reference="eq:danova_model2"}, $H_0$ becomes the equality of all group
+main-effect to zero
+$H_0: \forall g \quad {\mathbb E}^B (\alpha_{g}) = 0_{{\cal B}^2}$
+]{style="color: blue"}
+
+### Test statistics
+
+Reference the FANOVA version is [@gorecki_fdanova_2019].
+
+In the forthcoming formulas, to adapt FANOVA to DANOVA, the pointwise
+variations $SSB(x)$ and $SSW(x)$ from
+[\[eq:SSBloc\]](#eq:SSBloc){reference-type="eqref"
+reference="eq:SSBloc"} and
+[\[eq:SSWloc\]](#eq:SSWloc){reference-type="eqref"
+reference="eq:SSWloc"} will be applied to the clr transforms
+$f_{gi}= \operatorname{clr}(\pi_{gi}).$
+
+1.  The $L^2$-norm based test from [@zhang_statistical_2007]. The test
+    statistic is given by $$\label{eq:zhang}
+        L^2B= \int_a^b SSB(x)dx$$ Note that an alternative formula for
+    $L^2B$ when applied to clr of densities is given by
+    $$\label{eq:zhang2}
+        L^2B= \sum_{g=1}^G n_g \parallel \bar\pi_{g.} - \bar\pi_{..}\parallel^2_{B^2},$$
+    which shows that this statistic can be expressed as a norm and is
+    therefore invariant under almost-everywhere equality. Moreover this
+    norm coincides with the norm in Bayes space of the difference
+    between group means and overall mean. The `L2B` implementation uses
+    an asymptotic distribution of the test statistic.
+
+2.  The `CS` statistic from [@cuevas_anova_2004] uses pairwise
+    differences. When applied to clr of densities, due to the linearity
+    of $\operatorname{clr}$, we get $$\label{eq:cuevas}
+        CS = \sum_{g<g'} n_g \int_a^b \left( \operatorname{clr} {\bar\pi_{g.}}(x)- \operatorname{clr} {\bar\pi_{g'.}}(x) \right)^2dx =  \sum_{g<g'} n_g  \parallel \bar\pi_{g.} - \bar\pi_{g'.}\parallel^2_{B^2}$$
+
+    The `CS` implementation in the `fdANOVA` package uses a
+    heteroscedastic assumption and parametric bootstrap. Note that an
+    alternative formula for $CS$ is the sum of the Bayes norm of the
+    pairwise differences between groups.
+
+3.  $F$-type tests using both within and between variation, see
+    [@zhang_statistical_2011] and [@shen_f_2004]. We choose the `FB`
+    implementation (biased-reduced) for the quantile computation under
+    the null. $$\label{eq:Fvdb}
+        FB = \frac{{\int_a^b SSB(x)dx}/(G-1)}{\int_a^b SSW(x)dx /(n-G)} = \frac{\sum_{g=1}^G n_g \parallel \bar\pi_{g.} - \bar\pi_{..}\parallel^2_{B^2}/(G-1)}{\sum_{g=1}^G \sum_{i=1}^{n_g}  \parallel \pi_{gi} - \bar\pi_{g.}\parallel^2_{B^2}/(n-G)},$$
+    Under the null hypothesis, this statistic is asymptotically equal to
+    a linear combination of independent $\chi^2$ for the numerator and
+    the denominator, which can be approximated by a Fischer distribution
+    [@zhang_statistical_2011 Theorem 1 and equation 2.16]. This approach
+    coincides with the approach of [@van_den_boogaart_bayes_2014] by the
+    second equality in [\[eq:Fvdb\]](#eq:Fvdb){reference-type="eqref"
+    reference="eq:Fvdb"}. Note that [@van_den_boogaart_bayes_2014] use a
+    bootstrap procedure rather than the above approximation.
+
+4.  `GPF` from [@zhang_one-way_2014]: instead of integrating separately
+    the pointwise within variation (resp: between), the test statistic
+    integrates the pointwise F-ratio: $$\label{eq:GPF}
+        GPF = \int_a^b \frac{SSB(x)/(G-1)}{SSW(x)/(n-G)}dx$$ Under the
+    null hypothesis, this statistic is asymptotically equal to a linear
+    combination of independent $\chi^2$, which can be approximated by a
+    $\chi^2$-distribution [@zhang_one-way_2014 Proposition 1]. In the
+    implementation of the `fdANOVA` package, `GPF` is divided by $b-a$,
+    and the null distribution is modified accordingly.
+
+5.  `Fmax` from [@zhang_new_2019]: instead of integrating the pointwise
+    F-ratio as in `GPF`, they compute its supremum. We consider the
+    implementation `Fmaxb` which bootstraps the distribution under the
+    null hypothesis. $$\label{eq:Fmax}
+        F_{\max} = \sup_{x \in (a,b)} \frac{SSB(x)/(G-1)}{SSW(x)/(n-G)}$$
+    The statistic $F_{\max}$ is the only one that is not invariant under
+    almost-everywhere equality: changing one value of a density in the
+    dataset might change the value of $F_{\max}$. Note also that the
+    statistics $GPF$ and $F_{\max}$ cannot be written straightforwardly
+    in terms of norms in the Bayes space.
+
+Argument: in [@gorecki_fdanova_2018], they claim that the GPF test is
+more powerful than the F-type tests (page 5).
+
+### Application: regional changes in temperature distribution over the period 1987-2016
+
+$\pi_{git}$ maximum daily temperature density f for year $t$. We first
+apply for each province the slope estimation and obtain the set of slope
+densities $\beta_{gi=}.$ Then we test whether these slope densities vary
+across regions. Table [1](#tab:my_label){reference-type="ref"
+reference="tab:my_label"} summarizes the results for the above tests
+which all conclude that there is a difference in the way the regionial
+temperature densities evolve in time.
+
+```{r tbl-slopes_danova_global}
+#| tbl-cap: Test statistics and $p$-values for DANOVA.
+#| warning: false
+
+vnte <- vnt |>
+  mutate(t_max = as.fd(t_max)) |>
+  eval_funs(t_max, n = 1401) |>
+  select(province, x, y) |>
+  pivot_wider(names_from = province, values_from = y) |>
+  column_to_rownames("x")
+
+vnt_province_region <- vietnam_provinces$region
+names(vnt_province_region) <- vietnam_provinces$province
+
+stat_list <- list("GPF", "Fmaxb", "CS", "L2B", "FB")
+
+res <- fanova.tests(vnte, vnt_province_region[colnames(vnte)],
+  test = stat_list,
+  params = list(
+    paramCS = 100,
+    paramFmaxb = 100,
+    paramTRP = list(B.TRP = 100)
+  )
+)
+
+danova_tbl <- res[as_vector(stat_list)] |>
+  sapply(function(x) c(`Statistic` = x$stat, `p-value` = x$pval)) |>
+  t() |>
+  as.data.frame() |>
+  rownames_to_column("Name")
+
+kable_format(danova_tbl)
+```
+
+## One-sample problem for each group
+
+```{r tbl-one_sample_regional}
+#| tbl-cap: Sidak-adjusted $p$-values for the regional one-sample problems.
+
+one_sample_regional_tbl <- vnt |>
+  select(region, region_name, t_max) |>
+  summarise(t_max = list(c(t_max)), .by = c(region, region_name)) |>
+  rowwise() |>
+  mutate(res = list(one_sample(t_max))) |>
+  unnest(res) |>
+  select(region, Name, `p-value`) |>
+  pivot_wider(names_from = Name, values_from = `p-value`)
+
+multiple_testing <- function(tbl, m) {
+  mutate(tbl, across(where(is.numeric), ~ 1 - (1 - .x)^m))
+}
+
+kable_format(multiple_testing(one_sample_regional_tbl,
+  m = nrow(one_sample_regional_tbl)
+))
+```
+
+## Pairwise comparisons
+
+When the test of equality of the group mean densities is significant,
+conducting a post-hoc analysis of pairwise group mean comparisons can
+help identify which pairs differ. Testing whether the mean density in
+group $g_1$ is equal to the mean density in group $g_2$ is then
+equivalent to test whether the negative perturbation between these two
+means is equal to the neutral element in the space $B^2(a,b)$, which is
+the uniform density on $(a,b).$ In $L^2_0(a,b)$ it is also equivalent to
+test whether the clr of the mean density of group $g_1$ is equal to the
+clr of the mean density of group $g_2.$ Mathematically, these tests are
+the same as in the previous section for the case of two groups. A
+multiple testing correction is necessary when performing theses tests
+for all pairs of groups.
+
+### Test hypotheses
+
+For comparing group $g$ and $g'$:
+
+$H_0: \quad {\mathbb E}^B (\pi_{gi}) = {\mathbb E}^B (\pi_{g'i})$
+equivalent to
+$H_0: \forall g \quad {\mathbb E} (\text{clr }\pi_{gi}) = {\mathbb E} (\text{clr }\pi_{g'i})$
+
+### Test statistics
+
+Same as in previous section ? two ways: do a 2 group anova or do a one
+sample test on the difference between two groups ? equivalent for
+univariate but not here see Zhang page 137 in book. voir page 140 pour
+la comparaison.
+
+### Application: regional changes in temperature distribution over the period 1987-2016
+
+```{r tbl-slopes_danova_pairwise}
+#| tbl-cap: Sidak-adjusted $p$-values for pairwise comparisons.
+vntp <- t(combn(c("NMM", "RRD", "NCC", "CHR", "SR", "MDR"), m = 2))
+colnames(vntp) <- c("region1", "region2")
+
+pairwise_anova <- function(region1, region2) {
+  data <- vnte[vnt_province_region[colnames(vnte)] %in% c(region1, region2)]
+
+  res <- fanova.tests(data, vnt_province_region[colnames(data)],
+    test = stat_list,
+    params = list(
+      paramCS = 100,
+      paramFmaxb = 100,
+      paramTRP = list(B.TRP = 100)
+    )
+  )
+
+  res[as_vector(stat_list)] |>
+    sapply(function(x) c(x$pval)) |>
+    c()
+}
+
+multiple_testing <- function(tbl, m) {
+  mutate(tbl, across(where(is.numeric), ~ 1 - (1 - .x)^m))
+}
+
+pairwise_tbl <- as_tibble(vntp) |>
+  rowwise() |>
+  mutate(res = map2(region1, region2, pairwise_anova)) |>
+  unnest_wider(res)
+
+kable_format(multiple_testing(pairwise_tbl, m = nrow(pairwise_tbl)))
+```
+
+```{mermaid}
+%%| label: fig-slopes_danova_pairwise_diagram
+%%| fig-cap: Summary of pairwise tests.
+flowchart TB
+  NMM([NMM]) ~~~ MDR([MDR])
+  NMM <-.-> SR([SR])
+  NMM <--> CHR([CHR]) <--> SR
+  NMM <-.-> RRD([RRD]) <-.-> CHR
+  RRD <-.-> NCC
+  NCC <--> CHR
+  NMM <--> NCC([NCC]) <--> SR
+  SR <-.-> MDR
+  NMM ~~~ MDR([MDR])
+
+style NMM fill:#440053,color:#fff,stroke:#000
+style RRD fill:#414487,color:#fff,stroke:#000
+style NCC fill:#2B778E,stroke:#000
+style CHR fill:#22A885,stroke:#000
+style SR fill:#7AD051,stroke:#000
+style MDR fill:#FDE624,stroke:#000
+```
+
+
+# Interval-wise interpretation
+
+enlever le t, t' et garder t, t+1 page 12 de l'article Sonya notation
+$OR_{x\mid z}(\beta_{..}$ ou $OR_{x\mid z}(\beta_{g.})$
+
+pas d'anova ici, mais test de Student sur les log odds ratios
+(différences de clr), et tests de Student simultanément dans chaque
+région (ajustés)
+
+## Global trend
+
+We focus on subintervals $I \subset (a,b)$ and wish to make assessments
+about the time evolution of the relative probability to be in one
+interval versus the other.
+
+We can rely on Maier et al. (2024), see pages 10 and 11, proposition
+3.1, for the definition of the infinitesimal odds-ratios and their
+interpretation. The objective is to compare two densities at two
+different temperatures $x$ and $z$ in the range of temperature. let
+$\operatorname{OR}^{x\mid z}_{t\mid t'}$ be
+$$\operatorname{OR}^{x\mid z}_{t\mid t'} =
+ \frac{\frac{\pi_{it}(x)}{\pi_{it}(z)}}{\frac{\pi_{it'}(x)}{\pi_{it'} (z)}}
+ = \frac{\pi_{it}(x) \ominus \pi_{it'}(x)}{\pi_{it}(z) \ominus \pi_{it'}(z)}$$
+$\operatorname{OR}^{x\mid z}_{t\mid t'}$ allows to compare the density
+at time $t$ and $t'$ as follows. It is an odds ratio: the ratio of the
+odds of $x$ versus $z$ at time $t$ by the odds of $x$ versus $z$ at time
+$t'$. In the model
+[\[eq:slopereg\]](#eq:slopereg){reference-type="eqref"
+reference="eq:slopereg"}, assuming $\epsilon_{git}=0$, we have that
+$$\operatorname{OR}^{x\mid z}_{t\mid t'} = (\frac{\beta_{gi} (x)}{\beta_{gi} (z)})^{(t-t')}$$
+which is linked to the rate of change of the odds of $x$ versus $z$ in
+the period $(t',t).$ Because the probability of an event is an
+increasing function of its odds, if we observe that
+$\operatorname{OR}^{x\mid z}_{t\mid t'} >1$ for all $x,z$ when $x$ is in
+a given interval $A$ and $z$ in a given interval $B,$ then we may
+conclude that conditional on the temperature being in $A$ or $B$, the
+probability of being closer to $x$ than to $z$ at time $t$ is larger
+than the probability of being close to $x$ than to $z$ at time $t'.$
+Note that when $t>t'$ $\operatorname{OR}^{x\mid z}_{t\mid t'} >1$ is
+equivalent to $\beta_{gi}(x) > \beta_{gi}(z)$.
+
+### Application: global change in temperature distribution over the period 1987-2016
+
+```{r fig-interval_global}
+#| fig-cap: Global trend.
+#| fig-height: 3
+
+fmin <- function(...) UseMethod("fmin")
+fmax <- function(...) UseMethod("fmax")
+fargmin <- function(...) UseMethod("fargmin")
+fargmax <- function(...) UseMethod("fargmax")
+
+fmin.fdl <- function(...) fmin(c(...))
+fmax.fdl <- function(...) fmax(c(...))
+fargmin.fdl <- function(...) fargmin(c(...))
+fargmax.fdl <- function(...) fargmax(c(...))
+
+fsolve <- function(...) UseMethod("fsolve")
+fsolve.fdl <- function(...) fargmax(c(...))
+
+fmin.fd <- function(fdobj,
+                    a = min(fdobj$basis$rangeval),
+                    b = max(fdobj$basis$rangeval)) {
+  f <- function(x) eval(fdobj, x)
+  results <- lapply(
+    seq_along(f(a)),
+    function(i) optimize(function(x) f(x)[i], interval = c(a, b))
+  )
+  sapply(results, `[[`, "objective")
+}
+
+fargmin.fd <- function(fdobj,
+                       a = min(fdobj$basis$rangeval),
+                       b = max(fdobj$basis$rangeval)) {
+  f <- function(x) eval(fdobj, x)
+  results <- lapply(
+    seq_along(f(a)),
+    function(i) optimize(function(x) f(x)[i], interval = c(a, b))
+  )
+  sapply(results, `[[`, "minimum")
+}
+
+fmax.fd <- function(fdobj,
+                    a = min(fdobj$basis$rangeval),
+                    b = max(fdobj$basis$rangeval)) {
+  f <- function(x) -eval(fdobj, x)
+  results <- lapply(
+    seq_along(f(a)),
+    function(i) optimize(function(x) f(x)[i], interval = c(a, b))
+  )
+  -sapply(results, `[[`, "objective")
+}
+
+fargmax.fd <- function(fdobj,
+                       a = min(fdobj$basis$rangeval),
+                       b = max(fdobj$basis$rangeval)) {
+  f <- function(x) -eval(fdobj, x)
+  results <- lapply(
+    seq_along(f(a)),
+    function(i) optimize(function(x) f(x)[i], interval = c(a, b))
+  )
+  sapply(results, `[[`, "minimum")
+}
+
+fsolve.fd <- function(fdobj, k,
+                      a = min(fdobj$basis$rangeval),
+                      b = max(fdobj$basis$rangeval)) {
+  f <- function(x) eval(fdobj, x) - k
+  results <- lapply(
+    seq_along(f(a)),
+    function(i) uniroot(function(x) f(x)[i], interval = c(a, b))
+  )
+  sapply(results, `[[`, "root")
+}
+
+thres0 <- 0.5 * (fmax(vnt_mean, 25, 30) + fmin(vnt_mean, 20, 25))
+
+vnt_mean_thresholds <- tibble(
+  x = c(
+    fsolve(vnt_mean, fmax(vnt_mean, 25, 30), 15, 20),
+    fsolve(vnt_mean, thres0, 15, 22),
+    fsolve(vnt_mean, thres0, 22, 30),
+    fsolve(vnt_mean, thres0, 30, 35),
+    fsolve(vnt_mean, fmin(vnt_mean, 20, 25), 30, 35)
+  ),
+  y = c(
+    fmax(vnt_mean, 25, 30),
+    thres0,
+    thres0,
+    thres0,
+    fmin(vnt_mean, 20, 25)
+  )
+)
+
+vnt_mean_thresholds |> signif(3)
+
+plot(vnt_mean) +
+  geom_vline(data = vnt_mean_thresholds, aes(xintercept = x, color = y, linetype = -y)) +
+  geom_hline(data = vnt_mean_thresholds, aes(yintercept = y, color = y, linetype = -y)) +
+  scale_linetype_binned() +
+  scale_y_continuous(n.breaks = 4) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density"
+  )
+```
+
+
+## Regional trends
+
+### Application: regional changes in temperature distribution over the period 1987-2016
+
+```{r fig-interval_mountains}
+#| fig-cap: Mountainous regions.
+#| fig-height: 6
+thres1 <- 0.5 * (fmax(vntr$t_max[[1]], 30, 35) + fmin(vntr$t_max[[1]], 20, 30))
+thres3 <- 0.5 * (fmax(vntr$t_max[[3]], 30, 35) + fmin(vntr$t_max[[3]], 20, 30))
+
+vnt_mountains_thresholds <- rbind(tibble(
+  region = "NMM",
+  x = c(
+    fsolve(vntr$t_max[[1]], fmax(vntr$t_max[[1]], 30, 35), 20, 25),
+    fsolve(vntr$t_max[[1]], thres1, 20, 25),
+    fsolve(vntr$t_max[[1]], thres1, 25, 30),
+    fsolve(vntr$t_max[[1]], thres1, 30, 35),
+    fsolve(vntr$t_max[[1]], fmin(vntr$t_max[[1]], 20, 30), 30, 35)
+  ),
+  y = c(
+    fmax(vntr$t_max[[1]], 30, 35),
+    thres1,
+    thres1,
+    thres1,
+    fmin(vntr$t_max[[1]], 20, 30)
+  )
+), tibble(
+  region = "NCC",
+  x = c(
+    fsolve(vntr$t_max[[3]], fmax(vntr$t_max[[3]], 30, 35), 15, 25),
+    fsolve(vntr$t_max[[3]], thres3, 20, 25),
+    fsolve(vntr$t_max[[3]], thres3, 25, 30),
+    fsolve(vntr$t_max[[3]], thres3, 30, 35),
+    fsolve(vntr$t_max[[3]], fmin(vntr$t_max[[3]], 25, 30), 30, 35)
+  ),
+  y = c(
+    fmax(vntr$t_max[[3]], 30, 35),
+    thres3,
+    thres3,
+    thres3,
+    fmin(vntr$t_max[[3]], 25, 30)
+  )
+))
+
+vnt_mountains_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
+
+vntr |>
+  filter(region %in% c("NMM", "NCC")) |>
+  plot_funs(t_max) +
+  geom_vline(data = vnt_mountains_thresholds, aes(xintercept = x, color = y, linetype = -y)) +
+  geom_hline(data = vnt_mountains_thresholds, aes(yintercept = y, color = y, linetype = -y)) +
+  facet_grid(vars(region), axes = "all") +
+  scale_linetype_binned() +
+  scale_y_continuous(n.breaks = 4) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density"
+  )
+```
+
+```{r fig-interval_rrd}
+#| fig-cap: The particular case of the Red River delta.
+#| fig-height: 6
+vnt_rrd_thresholds <- rbind(tibble(
+  region = "RRD",
+  x = c(
+    fsolve(vntr$t_max[[2]], fmax(vntr$t_max[[2]], 12, 15), 35, 37),
+    fsolve(vntr$t_max[[2]], fmax(vntr$t_max[[2]], 12, 15), 37, 40),
+    fsolve(vntr$t_max[[2]], fmin(vntr$t_max[[2]], 37, 40), 15, 20),
+    fsolve(vntr$t_max[[2]], fmin(vntr$t_max[[2]], 37, 40), 30, 35)
+  ),
+  y = c(
+    fmax(vntr$t_max[[2]], 12, 15),
+    fmax(vntr$t_max[[2]], 12, 15),
+    fmin(vntr$t_max[[2]], 37, 40),
+    fmin(vntr$t_max[[2]], 37, 40)
+  )
+), tibble(
+  region = "CHR",
+  x = c(
+    fsolve(vntr$t_max[[4]], fmax(vntr$t_max[[4]], 20, 30), 35, 40),
+    fsolve(vntr$t_max[[4]], fmin(vntr$t_max[[4]], 30, 40), 15, 20),
+    fsolve(vntr$t_max[[4]], fmin(vntr$t_max[[4]], 30, 40), 20, 25)
+  ),
+  y = c(
+    fmax(vntr$t_max[[4]], 20, 30),
+    fmin(vntr$t_max[[4]], 30, 40),
+    fmin(vntr$t_max[[4]], 30, 40)
+  )
+))
+
+vnt_rrd_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
+
+vntr |>
+  filter(region %in% c("RRD", "CHR")) |>
+  plot_funs(t_max) +
+  geom_vline(data = vnt_rrd_thresholds, aes(xintercept = x, color = y, linetype = -y)) +
+  geom_hline(data = vnt_rrd_thresholds, aes(yintercept = y, color = y, linetype = -y)) +
+  facet_grid(vars(region), axes = "all") +
+  scale_linetype_binned() +
+  scale_y_continuous(n.breaks = 4) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density"
+  )
+```
+
+```{r fig-interval_south}
+#| fig-cap: Southern regions.
+#| fig-height: 6
+vnt_south_thresholds <- rbind(tibble(
+  region = "SR",
+  x = c(
+    fsolve(vntr$t_max[[5]], fmax(vntr$t_max[[5]], 12, 20), 20, 25),
+    fsolve(vntr$t_max[[5]], fmax(vntr$t_max[[5]], 12, 20), 25, 30),
+    fsolve(vntr$t_max[[5]], fmin(vntr$t_max[[5]], 12, 25), 30, 35)
+  ),
+  y = c(
+    fmax(vntr$t_max[[5]], 12, 20),
+    fmax(vntr$t_max[[5]], 12, 20),
+    fmin(vntr$t_max[[5]], 12, 25)
+  )
+), tibble(
+  region = "MDR",
+  x = c(
+    fsolve(vntr$t_max[[6]], fmax(vntr$t_max[[6]], 12, 20), 25, 30),
+    fsolve(vntr$t_max[[6]], fmax(vntr$t_max[[6]], 12, 20), 30, 35),
+    fsolve(vntr$t_max[[6]], fmin(vntr$t_max[[6]], 12, 25), 30, 35)
+  ),
+  y = c(
+    fmax(vntr$t_max[[6]], 12, 20),
+    fmax(vntr$t_max[[6]], 12, 20),
+    fmin(vntr$t_max[[6]], 12, 25)
+  )
+))
+
+vnt_south_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
+
+vntr |>
+  filter(region %in% c("SR", "MDR")) |>
+  plot_funs(t_max) +
+  geom_vline(data = vnt_south_thresholds, aes(xintercept = x, color = y, linetype = -y)) +
+  geom_hline(data = vnt_south_thresholds, aes(yintercept = y, color = y, linetype = -y)) +
+  facet_grid(vars(region), axes = "all") +
+  scale_linetype_binned() +
+  scale_y_continuous(n.breaks = 4) +
+  theme(legend.position = "none") +
+  labs(
+    x = "Temperature (deg. Celsius)",
+    y = "Density"
+  )
+```
+
+# Conclusion and perspectives {#sec-conclusion}
+
+# Acknowledgments {.appendix .unnumbered}
+
+# Appendix {.appendix .unnumbered}
+
+## Residuals in temporal regression {.appendix .unnumbered}
+
+```{r fig-residuals}
+#| fig-cap: $\frac{\| \varepsilon (t) \|^2}{\| y(t) - \overline y (t) \|^2}$.
+vnt |>
+  select(!rsq) |>
+  unnest(ssr_evol) |>
+  ggplot(aes(t, ssr, color = region, group = province)) +
+  geom_point() +
+  geom_line() +
+  facet_grid(vars(region))
+```
+
+```{r fig-rsq-map}
+#| fig-cap: $R^2 = 1 - \frac{\sum_t \| \varepsilon (t) \|^2}{\sum_t \| y(t) - \overline y (t) \|^2}$.
+#| fig-height: 9
+vietnam_provinces |>
+  left_join(vnt, by = "province") |>
+  ggplot(aes(fill = rsq)) +
+  geom_sf() +
+  scale_fill_viridis_c() +
+  scale_x_continuous(breaks = seq(from = -180, to = 180, by = 2)) +
+  labs(x = "Longitude", y = "Latitude", fill = "Region")
+```
+
+## Normality assumption {.appendix .unnumbered}
+
+```{r normality}
+#| eval: false
+vnt_pc <- pca.fd(c(vnt$t_max), nharm = 5)
+pairs(vnt_pc$scores)
+mvn(vnt_pc$scores, mvnTest = "mardia")
+```
+
+## Homogeneity of variances {.appendix .unnumbered}
+
+```{r fig-variance_homogeneity}
+#| fig-cap: Correlation function within the MDR region.
+
+vnt_var <- var.fd(c(as.fd(vnt$t_max)))
+
+tt <- seq(
+  vnt_var$sbasis$rangeval[1],
+  vnt_var$sbasis$rangeval[2],
+  length.out = 401
+)
+
+z <- eval.bifd(tt, tt, vnt_var) # Covariance
+z <- cor.fd(tt, c(as.fd(vnt$t_max))) # Correlation
+
+df <- data.frame(
+  x = rep(tt, each = length(tt)),
+  y = rep(tt, times = length(tt)),
+  z = as.vector(z)
+)
+
+ggplot(df, aes(x = x, y = y, z = z)) +
+  geom_contour_filled() +
+  labs(
+    fill = "Correlation",
+    x = "Temperature (deg. Celsius)", y = "Temperature (deg. Celsius)"
+  )
+```
+
+## Spatial dependence {.appendix .unnumbered}
+
+Using the approach from @menafoglio_kriging_2014, we estimate the trace-variogram of the slope densities data set.
+
 ```{r fig-distance_matrices}
+#| fig-cap:
+#|  - Spatial distances between centroids of Vietnam provinces, from north to south.
+#|  - Bayes distances between slope densities of maximum temperature.
+#| layout-ncol: 2
 library(sf)
 library(units)
 
 vnt_sdist <- vnt |>
-  left_join(select(vietnam_provinces,!region), by = "province") |>
+  left_join(select(vietnam_provinces, !region), by = "province") |>
 	st_as_sf() |>
+	st_centroid() |>
 	st_distance() |>
 	set_units("km") |>
 	drop_units()
@@ -283,11 +1068,17 @@ vnt_sdist <- vnt |>
 ggplot(reshape2::melt(vnt_sdist), aes(x = Var1, y = Var2, fill = value)) +
   geom_tile() +
   scale_fill_viridis_c(option = "magma") +
-  coord_fixed()
+  coord_fixed() + labs(fill = "Distance (km)") + theme_void()
 
-fd_obj <- as.fd(c(vnt$t_max))
+# Computing ANOVA residuals
+vnt_rmeans <- vnt |>
+  select(!province) |>
+  group_by(region, region_name) |>
+  mutate(t_max = mean(t_max))
+fd_obj <- as.fd(c(vnt$t_max - vnt_rmeans$t_max))
 n <- nrow(vnt)
 
+# Computing pairwise Bayes distances between residuals
 vnt_fdist <- matrix(0, n, n)
 for(i in 1:(n-1)){
   for(j in (i+1):n){
@@ -300,27 +1091,31 @@ for(i in 1:(n-1)){
 ggplot(reshape2::melt(vnt_fdist), aes(x = Var1, y = Var2, fill = value)) +
   geom_tile() +
   scale_fill_viridis_c(option = "magma") +
-  coord_fixed()
+  coord_fixed() + labs(fill = "Bayes distance") + theme_void()
 ```
 
 ```{r fig-trace-variogram}
-# Charger gstat
+#| fig-cap: Trace-variogram of group-centered slope densities in the Bayes space.
+
 library(gstat)
 library(dplyr)
 
-variogram_dist <- function(dist_mat, gamma_mat, cutoff = NULL, width = NULL) {
+variogram_dist <- function(dist_mat, fdist_mat, cutoff = NULL, width = NULL, nbins = 15) {
   n <- nrow(dist_mat)
   
   # Check that both matrices are square and of the same size
-  if (!is.matrix(dist_mat) || !is.matrix(gamma_mat) ||
-      ncol(dist_mat) != n || nrow(gamma_mat) != n || ncol(gamma_mat) != n) {
-    stop("dist_mat and gamma_mat must be square matrices of the same size.")
+  if (!is.matrix(dist_mat) || !is.matrix(fdist_mat) ||
+      ncol(dist_mat) != n || nrow(fdist_mat) != n || ncol(fdist_mat) != n) {
+    stop("dist_mat and fdist_mat must be square matrices of the same size.")
   }
+  
+  # Compute gamma matrix from feature-distance matrix
+  gamma_mat <- 0.5 * fdist_mat^2
   
   # Default cutoff and bin width similar to gstat
   dmax <- max(dist_mat, na.rm = TRUE)
   if (is.null(cutoff)) cutoff <- dmax / 3
-  if (is.null(width)) width <- cutoff / 15
+  if (is.null(width)) width <- cutoff / nbins
   
   # Create bin breaks
   breaks <- seq(0, cutoff, by = width)
@@ -328,8 +1123,8 @@ variogram_dist <- function(dist_mat, gamma_mat, cutoff = NULL, width = NULL) {
   
   # Extract upper-triangle indices (i < j)
   idx <- which(upper.tri(dist_mat), arr.ind = TRUE)
-  d_ij <- dist_mat[idx]       # distances for each pair
-  gamma_ij <- gamma_mat[idx]  # precomputed semi-variances for each pair
+  d_ij <- dist_mat[idx]          # spatial distances
+  gamma_ij <- gamma_mat[idx]     # computed semivariances
   
   # Assign each pair to a bin
   bin_id <- cut(d_ij, breaks = breaks, include.lowest = TRUE)
@@ -350,11 +1145,6 @@ variogram_dist <- function(dist_mat, gamma_mat, cutoff = NULL, width = NULL) {
 }
 
 vg <- variogram_dist(vnt_sdist, vnt_fdist)
-plot(vg$dist, vg$gamma)
-```
 
-{{< include global/index.qmd >}}
-{{< include interval/index.qmd >}}
-{{< include conclusion/index.qmd >}}
-{{< include acknowledgements/index.qmd >}}
-{{< include appendix/index.qmd >}}
+ggplot(vg, aes(x=dist, y=gamma)) + geom_point() + labs(x = "Distance (km)", y = "Semivariance")
+```

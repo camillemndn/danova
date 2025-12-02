@@ -7,6 +7,16 @@ let
       (_: prev: {
         rPackages = prev.rPackages.override {
           overrides = with prev.rPackages; {
+            colorout = buildRPackage {
+              name = "colorout";
+              src = pkgs.fetchFromGitHub {
+                owner = "jalvesaq";
+                repo = "colorout";
+                rev = "v1.3-3";
+                hash = "sha256-1aWDrvW1+X5bxJEZlm3RLy8Urx6UlYX7BqJwNF2bNYA=";
+              };
+            };
+
             dda = buildRPackage {
               name = "dda";
               src = pkgs.fetchFromGitHub {
@@ -42,6 +52,7 @@ let
     sf
     tidyverse
 
+    colorout
     devtools
     languageserver
     quarto
