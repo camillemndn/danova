@@ -118,7 +118,7 @@ rec {
         HOME = ".";
 
         buildPhase = ''
-          quarto render index.qmd --to html
+          quarto render index.qmd
           image_optim --recursive _manuscript
         '';
 

@@ -130,14 +130,13 @@ citation:
 
 ```{r setup}
 #| include: false
-
 source("setup.R")
 ```
 
 ```{r fig-map}
 #| fig-cap: Map of Vietnam by region.
 #| fig-height: 9
-
+#| out-width: 50%
 library(boot)
 library(CompQuadForm)
 library(dda)
@@ -182,7 +181,8 @@ vietnam_provinces |>
 
 ```{r fig-smoothing}
 #| fig-cap: Density of maximum temperature grouped per region.
-
+#| fig-height: 14
+#| out-width: 50%
 vntry <- vietnam_temperature_dd |>
   left_join(vietnam_regions, by = c("region" = "code")) |>
   rename(region_name = name) |>
@@ -222,7 +222,8 @@ $$\operatorname{clr}(\pi_{git})(x) =  \operatorname{clr}(\alpha_{gi})(x) + t \op
 
 ```{r fig-slopes}
 #| fig-cap: Trends by province in each region.
-
+#| fig-height: 14
+#| out-width: 50%
 to_slope <- function(ddobj, t = seq_len(ncol(ddobj$coefs))) {
   model <- lm(t(ddobj$coefs) ~ t)
 
@@ -278,7 +279,6 @@ vnt |> plot_funs(t_max, color = region_name) +
 #| fig-subcap:
 #|  - Mean annual slope of the maximum temperature distributions between 1987 and 2016.
 #|  - Centered log-ratio transform of the mean annual slope of maximum temperature distributions between 1987 and 2016.
-#| fig-height: 3
 #| layout-ncol: 2
 vnt_mean <- mean(c(vnt$t_max))
 
@@ -394,6 +394,8 @@ kable_format(one_sample(c(vnt$t_max)))
 
 ```{r fig-slopes_regional_means}
 #| fig-cap: Regional mean slope and overall slope.
+#| fig-height: 14
+#| out-width: 50%
 vntr <- vnt |>
   select(!province) |>
   group_by(region, region_name) |>
@@ -413,7 +415,6 @@ vntr |> plot_funs(t_max, color = region_name) +
 
 ```{r fig-slopes_regional_means_centered}
 #| fig-cap: Regional mean slope, centered by the global mean.
-#| fig-height: 3
 vnt |>
   select(!province) |>
   mutate(t_max = center(t_max)) |>
@@ -527,8 +528,6 @@ temperature densities evolve in time.
 
 ```{r tbl-slopes_danova_global}
 #| tbl-cap: Test statistics and $p$-values for DANOVA.
-#| warning: false
-
 vnte <- vnt |>
   mutate(t_max = as.fd(t_max)) |>
   eval_funs(t_max, n = 1401) |>
@@ -563,7 +562,6 @@ kable_format(danova_tbl)
 
 ```{r tbl-one_sample_regional}
 #| tbl-cap: Sidak-adjusted $p$-values for the regional one-sample problems.
-
 one_sample_regional_tbl <- vnt |>
   select(region, region_name, t_max) |>
   summarise(t_max = list(c(t_max)), .by = c(region, region_name)) |>
@@ -651,6 +649,7 @@ kable_format(multiple_testing(pairwise_tbl, m = nrow(pairwise_tbl)))
 ```{mermaid}
 %%| label: fig-slopes_danova_pairwise_diagram
 %%| fig-cap: Summary of pairwise tests.
+%%| out-width: 50%
 flowchart TB
   NMM([NMM]) ~~~ MDR([MDR])
   NMM <-.-> SR([SR])
@@ -716,8 +715,7 @@ equivalent to $\beta_{gi}(x) > \beta_{gi}(z)$.
 
 ```{r fig-interval_global}
 #| fig-cap: Global trend.
-#| fig-height: 3
-
+#| out-width: 50%
 fmin <- function(...) UseMethod("fmin")
 fmax <- function(...) UseMethod("fmax")
 fargmin <- function(...) UseMethod("fargmin")
@@ -827,6 +825,7 @@ plot(vnt_mean) +
 ```{r fig-interval_mountains}
 #| fig-cap: Mountainous regions.
 #| fig-height: 6
+#| out-width: 50%
 thres1 <- 0.5 * (fmax(vntr$t_max[[1]], 30, 35) + fmin(vntr$t_max[[1]], 20, 30))
 thres3 <- 0.5 * (fmax(vntr$t_max[[3]], 30, 35) + fmin(vntr$t_max[[3]], 20, 30))
 
@@ -884,6 +883,7 @@ vntr |>
 ```{r fig-interval_rrd}
 #| fig-cap: The particular case of the Red River delta.
 #| fig-height: 6
+#| out-width: 50%
 vnt_rrd_thresholds <- rbind(tibble(
   region = "RRD",
   x = c(
@@ -932,6 +932,7 @@ vntr |>
 ```{r fig-interval_south}
 #| fig-cap: Southern regions.
 #| fig-height: 6
+#| out-width: 50%
 vnt_south_thresholds <- rbind(tibble(
   region = "SR",
   x = c(
@@ -985,6 +986,7 @@ vntr |>
 
 ```{r fig-residuals}
 #| fig-cap: $\frac{\| \varepsilon (t) \|^2}{\| y(t) - \overline y (t) \|^2}$.
+#| out-width: 50%
 vnt |>
   select(!rsq) |>
   unnest(ssr_evol) |>
@@ -997,6 +999,7 @@ vnt |>
 ```{r fig-rsq-map}
 #| fig-cap: $R^2 = 1 - \frac{\sum_t \| \varepsilon (t) \|^2}{\sum_t \| y(t) - \overline y (t) \|^2}$.
 #| fig-height: 9
+#| out-width: 50%
 vietnam_provinces |>
   left_join(vnt, by = "province") |>
   ggplot(aes(fill = rsq)) +
@@ -1096,7 +1099,7 @@ ggplot(reshape2::melt(vnt_fdist), aes(x = Var1, y = Var2, fill = value)) +
 
 ```{r fig-trace-variogram}
 #| fig-cap: Trace-variogram of group-centered slope densities in the Bayes space.
-
+#| out-width: 50%
 library(gstat)
 library(dplyr)
 

@@ -5,6 +5,10 @@ bibliography: references.bib
 cache: true
 citation: true
 df-print: kable
+fig-align: center
+fig-width: 5
+fig-heigth: 3
+fig-dpi: 300
 lang: en
 lightbox: true
 link-external-newwindow: true
@@ -24,7 +28,7 @@ format:
     fig-format: jpeg
     include-in-header:
       text: |
-        <script defer data-domain="camillemondon.com" src="https://analytics.mondon.xyz/js/script.js"></script>
+        <script defer data-domain="camillemondon.com" src="https://analytics.mondon.xyz/js/script.js"></script>    header-includes:
   arxiv-pdf:
     authorcols: true
     biblatexoptions:
@@ -35,10 +39,14 @@ format:
     colorlinks: false
     echo: false
     fig-format: pdf
+    fig-pos: ht
     link-citations: true
     pdf-engine: pdflatex
 
 knitr:
   opts_knit:
-    fig.align: center
+    collapse: true
+    comment: "#>"
+    warning: false
+    dev.args: list(bg = "white")
     root.dir: ./
