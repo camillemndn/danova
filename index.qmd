@@ -171,7 +171,7 @@ vietnam_provinces |>
   left_join(vietnam_regions, by = c("region" = "code")) |>
   rename(region_name = name) |>
   ggplot(aes(fill = region_name)) +
-  scale_fill_viridis_d(end = 0.8) +
+  scale_fill_viridis_d(option = "magma", end = 0.8) +
   theme_legend_inside +
   geom_sf() +
   scale_x_continuous(breaks = seq(from = -180, to = 180, by = 2)) +
@@ -197,7 +197,7 @@ vntry |>
   facet_grid(vars(region), axes = "all") +
   scale_linewidth(range = c(0.1, 1.2)) +
   scale_y_continuous(n.breaks = 4) +
-	scale_color_viridis_c(option = "magma", end = 0.8) +
+	scale_color_viridis_c(end = 0.8) +
   labs(
     x = "Temperature (deg. Celsius)",
     y = "Density",
@@ -260,7 +260,7 @@ class(vnt$t_max) <- c("ddl", "fdl", "list")
 
 vnt |> plot_funs(t_max, color = region_name) +
   facet_grid(vars(region), axes = "all") +
-  scale_color_viridis_d(end = 0.8) +
+  scale_color_viridis_d(option = "magma", end = 0.8) +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
@@ -273,7 +273,6 @@ vnt |> plot_funs(t_max, color = region_name) +
 # Global tests
 
 ## One-sample problem
-
 
 ```{r fig-slopes_mean}
 #| fig-subcap:
@@ -404,7 +403,7 @@ vntr <- vnt |>
 vntr |> plot_funs(t_max, color = region_name) +
   geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
   facet_grid(vars(region), axes = "all") +
-  scale_color_viridis_d(end = 0.8) +
+  scale_color_viridis_d(option = "magma", end = 0.8) +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   labs(
@@ -422,7 +421,7 @@ vnt |>
   summarise(t_max = mean(t_max), .groups = "drop") |>
   mutate(t_max = as.fd(t_max)) |>
   plot_funs(t_max, color = region_name) +
-  scale_color_viridis_d(end = 0.8) +
+  scale_color_viridis_d(option = "magma", end = 0.8) +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   labs(
@@ -661,12 +660,12 @@ flowchart TB
   SR <-.-> MDR
   NMM ~~~ MDR([MDR])
 
-style NMM fill:#440053,color:#fff,stroke:#000
-style RRD fill:#414487,color:#fff,stroke:#000
-style NCC fill:#2B778E,stroke:#000
-style CHR fill:#22A885,stroke:#000
-style SR fill:#7AD051,stroke:#000
-style MDR fill:#FDE624,stroke:#000
+style NMM fill:#000004,color:#fff,stroke:#000
+style RRD fill:#29115b,color:#fff,stroke:#000
+style NCC fill:#6d1c82,color:#fff,stroke:#000
+style CHR fill:#ac337b,stroke:#000
+style SR fill:#ea5662,stroke:#000
+style MDR fill:#ff9f6f,stroke:#000
 ```
 
 
