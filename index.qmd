@@ -145,6 +145,7 @@ library(fda.usc)
 library(MVN)
 library(sf)
 library(tidyverse)
+library(colorspace)
 set.seed(10983)
 
 data(vietnam_temperature_dd)
@@ -170,7 +171,7 @@ vietnam_provinces |>
   left_join(vietnam_regions, by = c("region" = "code")) |>
   rename(region_name = name) |>
   ggplot(aes(fill = region_name)) +
-  scale_fill_viridis_d() +
+  scale_fill_viridis_d(end = 0.8) +
   theme_legend_inside +
   geom_sf() +
   scale_x_continuous(breaks = seq(from = -180, to = 180, by = 2)) +
@@ -192,16 +193,15 @@ vntry <- vietnam_temperature_dd |>
   summarise(t_max = mean(t_max))
 
 vntry |>
-  plot_funs(t_max, color = region_name, linewidth = year, alpha = year) +
+  plot_funs(t_max, color = year) +
   facet_grid(vars(region), axes = "all") +
   scale_linewidth(range = c(0.1, 1.2)) +
   scale_y_continuous(n.breaks = 4) +
-  scale_color_viridis_d() +
-  theme(legend.position = "none") +
+	scale_color_viridis_c(option = "magma", end = 0.8) +
   labs(
     x = "Temperature (deg. Celsius)",
     y = "Density",
-    color = "Region"
+    color = "Year"
   )
 ```
 
@@ -260,7 +260,7 @@ class(vnt$t_max) <- c("ddl", "fdl", "list")
 
 vnt |> plot_funs(t_max, color = region_name) +
   facet_grid(vars(region), axes = "all") +
-  scale_color_viridis_d() +
+  scale_color_viridis_d(end = 0.8) +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
@@ -404,7 +404,7 @@ vntr <- vnt |>
 vntr |> plot_funs(t_max, color = region_name) +
   geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
   facet_grid(vars(region), axes = "all") +
-  scale_color_viridis_d() +
+  scale_color_viridis_d(end = 0.8) +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   labs(
@@ -422,7 +422,7 @@ vnt |>
   summarise(t_max = mean(t_max), .groups = "drop") |>
   mutate(t_max = as.fd(t_max)) |>
   plot_funs(t_max, color = region_name) +
-  scale_color_viridis_d() +
+  scale_color_viridis_d(end = 0.8) +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   labs(
@@ -1006,7 +1006,7 @@ vietnam_provinces |>
   geom_sf() +
   scale_fill_viridis_c() +
   scale_x_continuous(breaks = seq(from = -180, to = 180, by = 2)) +
-  labs(x = "Longitude", y = "Latitude", fill = "Region")
+  labs(x = "Longitude", y = "Latitude", fill = "R squared")
 ```
 
 ## Normality assumption {.appendix .unnumbered}
@@ -1042,6 +1042,7 @@ df <- data.frame(
 
 ggplot(df, aes(x = x, y = y, z = z)) +
   geom_contour_filled() +
+	coord_fixed() +
   labs(
     fill = "Correlation",
     x = "Temperature (deg. Celsius)", y = "Temperature (deg. Celsius)"
@@ -1071,6 +1072,7 @@ vnt_sdist <- vnt |>
 ggplot(reshape2::melt(vnt_sdist), aes(x = Var1, y = Var2, fill = value)) +
   geom_tile() +
   scale_fill_viridis_c(option = "magma") +
+	scale_y_reverse() +
   coord_fixed() + labs(fill = "Distance (km)") + theme_void()
 
 # Computing ANOVA residuals
@@ -1094,6 +1096,7 @@ for(i in 1:(n-1)){
 ggplot(reshape2::melt(vnt_fdist), aes(x = Var1, y = Var2, fill = value)) +
   geom_tile() +
   scale_fill_viridis_c(option = "magma") +
+	scale_y_reverse() +
   coord_fixed() + labs(fill = "Bayes distance") + theme_void()
 ```
 

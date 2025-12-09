@@ -28,7 +28,7 @@ format:
     fig-format: jpeg
     include-in-header:
       text: |
-        <script defer data-domain="camillemondon.com" src="https://analytics.mondon.xyz/js/script.js"></script>    header-includes:
+        <script defer data-domain="camillemondon.com" src="https://analytics.mondon.xyz/js/script.js"></script>
   arxiv-pdf:
     authorcols: true
     biblatexoptions:
