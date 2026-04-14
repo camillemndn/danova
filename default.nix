@@ -80,7 +80,6 @@ rec {
     nativeBuildInputs = with pkgs; [
       npins
       (quarto.override { extraRPackages = r-deps; })
-      (rstudioWrapper.override { packages = r-deps; })
       (rWrapper.override { packages = r-deps; })
       texliveFull
       librsvg
