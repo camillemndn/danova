@@ -1239,8 +1239,6 @@ vnt_mountains_thresholds <- rbind(tibble(
   )
 ))
 
-vnt_mountains_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
-
 vntr |>
   filter(region %in% c("NMM", "NCC")) |>
   plot_funs(t_max) +
@@ -1254,6 +1252,13 @@ vntr |>
     x = "Temperature (deg. Celsius)",
     y = "Density"
   )
+```
+
+```{r tbl-interval_mountains}
+#| fig-cap: Levels for the North Central Coast (NCC) and Northern Midlands and Mountains (NMM) regions.
+#| fig-height: 6
+#| out-width: 50%
+vnt_mountains_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
 ```
 
 ```{r fig-interval_rrd}
@@ -1288,8 +1293,6 @@ vnt_rrd_thresholds <- rbind(tibble(
   )
 ))
 
-vnt_rrd_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
-
 vntr |>
   filter(region %in% c("RRD", "CHR")) |>
   plot_funs(t_max) +
@@ -1303,6 +1306,13 @@ vntr |>
     x = "Temperature (deg. Celsius)",
     y = "Density"
   )
+```
+
+```{r tbl-interval_rrd}
+#| fig-cap: Levels for the Red River Delta (RRD) and Central Highlands (CHR) regions.
+#| fig-height: 6
+#| out-width: 50%
+vnt_rrd_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
 ```
 
 ```{r fig-interval_south}
@@ -1335,8 +1345,6 @@ vnt_south_thresholds <- rbind(tibble(
   )
 ))
 
-vnt_south_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
-
 vntr |>
   filter(region %in% c("SR", "MDR")) |>
   plot_funs(t_max) +
@@ -1352,7 +1360,15 @@ vntr |>
   )
 ```
 
-a @fig-interval_mountains, @fig-interval_rrd and @fig-interval_south
+```{r tbl-interval_south}
+#| fig-cap: Levels for the Southeast (SR) and Mekong Delta (MDR) regions.
+#| fig-height: 6
+#| out-width: 50%
+vnt_south_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
+
+```
+
+@fig-interval_mountains, @fig-interval_rrd and @fig-interval_south
 display the slope densities of the six
 regions with some chosen values of level $\tau$. We are able to group
 the regions in terms of the shape of their mean slope density.
