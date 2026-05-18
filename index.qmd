@@ -141,12 +141,12 @@ the framework of functional data analysis, due to their inherent
 constraints, namely non-negativity and integration to one. It is
 typically assumed that each observation corresponds to a sampled
 continuous density function, belonging to an infinite-dimensional
-function space, as discussed in [@petersen_modeling_2022]. A smoothing
+function space, as discussed in @petersen_modeling_2022. A smoothing
 tool is necessary to fill the gap between the discrete data and the
 continuous temperature density objects and this procedure step is called
-preprocessing. Among the methods described in [@petersen_modeling_2022],
+preprocessing. Among the methods described in @petersen_modeling_2022,
 we use the Bayes spaces approach first introduced in
-[@egozcue_hilbert_2006], and later on developed in
+@egozcue_hilbert_2006 and later on developed in
 [@van_den_boogaart_bayes_2010; @van_den_boogaart_bayes_2014].
 
 In this paper, we focus on testing mean density functions, investigating
@@ -181,7 +181,7 @@ between the groups in CoDA]. This question is treated in @sec-pairwise.
 
 Finally, in @sec-intervalwise, to go beyond the global comparisons of
 densities and do a more local analysis, we adapt a technique based on
-odds ratios from [@maier_additive_2025] to infer the relative mass of
+odds ratios from @maier_additive_2025 to infer the relative mass of
 the densities over specific intervals.
 
 We apply the above tools to address different questions relative to
@@ -203,7 +203,7 @@ a more localized analysis of temperature density evolution.
 
 ## Reminders on functional one-sample problem {#sec-reminders_1sample}
 
-In Chapter 5 of [@zhang_analysis_2013], the functional sample
+In Chapter 5 of @zhang_analysis_2013, the functional sample
 $(f_1, \dots, f_n),$ is assumed to arise from the following model
 $$f_{i}(x)= f_0(x) + v_{i}(x),$$ {#eq-fun_mod_1sample}
 where $f_0(x) = {\mathbb E}(f_{i})(x)$ is the unknown mean function and the
@@ -248,12 +248,12 @@ test based on the integral of the pointwise F-ratio statistic (see @sec-anova)
 and the $F_\text{max}$ test based on the maximum of the pointwise
 F-test. It is then necessary to approximate the null distribution of
 these statistics. This can be achieved using a permutation based
-procedure as in or a bootstrap procedure as in .
+procedure as in @ramsay_functional_2005 or a bootstrap procedure as in @zhang_new_2019.
 
 ## Reminders on distributional data analysis and Bayes spaces {#sec-remind_dda}
 
 @egozcue_hilbert_2006 and
-[@van_den_boogaart_bayes_2010; @van_den_boogaart_bayes_2014] define the
+@van_den_boogaart_bayes_2010 and @van_den_boogaart_bayes_2014 define the
 Bayes spaces of probability density functions relative to a reference
 measure $\lambda$ on an interval of $\mathbb R$, in a similar fashion as
 $L^2(\lambda)$ spaces. In the following, the measure $\lambda$ will be
@@ -293,8 +293,7 @@ $\odot$ is called Aitchison powering.
 Since it is important to understand some further developments, we recall
 that, given two elements $\varphi_1$ and $\varphi_2$ of the Bayes space,
 the perturbation density $\varphi_2 (x) \ominus \varphi_1 (x)$ is the
-closure of the ratio $\frac{\varphi_2 (x)}{\varphi_1 (x)}$, which is the
-equal to
+closure of the ratio $\frac{\varphi_2 (x)}{\varphi_1 (x)}$, which is equal to
 $\frac{{\varphi_2 (x)}/{\varphi_1 (x)}}{\int_a^b {\varphi_2 (u)}/{\varphi_1 (u)}du}$.
 
 Following @van_den_boogaart_bayes_2014, it is also possible to use the
@@ -336,7 +335,7 @@ the global one-sample test on mean densities is equivalent
 to a one sample test in the $L^2(a,b)$ space on the clr transformed
 densities $f_i = \operatorname{clr} (\varphi_i)$ for which we may apply
 a classical one sample test for functional data as described in Chapter
-5 of [@zhang_analysis_2013]. As in [@zhang_analysis_2013], the
+5 of @zhang_analysis_2013. As in @zhang_analysis_2013, the
 functional sample $(f_1, \dots, f_n),$ is assumed to arise from model @eq-fun_mod_1sample.
 
 Two test statistics are available: the $L^2$-norm test statistic
@@ -355,14 +354,14 @@ densities in $B^2(a,b)$. We can see that it does correspond to an
 $L^2$-norm statistic to test the equality in $L^2_0$ of the clr
 transform $f_i= \operatorname{clr} (\varphi_i)$ of our sample of
 densities $\varphi_i$. We can therefore apply the classical one sample
-test for functional data described in Chapter 5 of [@zhang_analysis_2013].
+test for functional data described in Chapter 5 of @zhang_analysis_2013.
 
 The asymptotic distribution of this statistic under the null is that of
 a linear combination of chi-squared statistics weighted by the
 eigenvalues of the covariance operator, see
 [@kokoszka_introduction_2017]. For the computation of the $p$-value of
 the test, the eigenvalues have to be estimated using FPCA and
-[@kokoszka_introduction_2017] provide code for the computation of the
+@kokoszka_introduction_2017 provide code for the computation of the
 $L^2$-norm.
 
 #### PC approach {#pc-approach .unnumbered}
@@ -448,19 +447,19 @@ where $\operatorname{SSB}(x)$ is given by
 $\operatorname{L^2B}$ can be written using the norm of the Bayes space:
 $$\operatorname{L^2B} = \sum_{g=1}^G n_g \| \bar\varphi_{g.} \ominus \bar\varphi_{..}\|^2_{B^2},$$ {#eq-zhang2}
 which shows that this statistic is invariant under almost-everywhere
-equality. In the [@gorecki_fdanova_2019] `fdANOVA` `R`
+equality. In the @gorecki_fdanova_2019 `fdANOVA` `R`
 package, the `L2B` implementation uses an asymptotic distribution of the
 test statistic.
 
 #### $\operatorname{FB}$ statistic {#operatornamefb-statistic .unnumbered}
 
-The F-type tests from [@shen_f_2004] and [@zhang_statistical_2011] use
+The F-type tests from @shen_f_2004 and @zhang_statistical_2011 use
 both within and between variation:
 $$\begin{split}
 \operatorname{FB} &= \frac{{\int_a^b \operatorname{SSB}(x)dx}/(G-1)}{\int_a^b \operatorname{SSW}(x)dx /(n-G)} \\
 &= \frac{\sum_{g=1}^G n_g \| \bar\varphi_{g.} \ominus \bar\varphi_{..}\|^2_{B^2}/(G-1)}{\sum_{g=1}^G \sum_{i=1}^{n_g} \| \varphi_{gj} \ominus \bar\varphi_{g.}\|^2_{B^2}/(n-G)}.
 \end{split}$$ {#eq-Fvdb}
-We choose the biased-reduced `FB` implementation for the
+We choose the bias-reduced `FB` implementation for the
 computation of the $p$-value. Under the null hypothesis, this statistic
 is asymptotically equal to a linear combination of independent $\chi^2$
 for the numerator and the denominator, and can thus be approximated by a
@@ -472,7 +471,7 @@ than the above approximation.
 
 #### $\operatorname{CS}$ statistic {#operatornamecs-statistic .unnumbered}
 
-The CS statistic from [@cuevas_anova_2004] uses pairwise differences.
+The CS statistic from @cuevas_anova_2004 uses pairwise differences.
 When applied to clr of densities, due to the linearity of
 $\operatorname{clr}$, we get
 $$\begin{split}
@@ -486,7 +485,7 @@ differences between groups.
 
 #### $\operatorname{GPF}$ statistic {#operatornamegpf-statistic .unnumbered}
 
-The GPF statistic from [@zhang_one-way_2014] integrates the pointwise
+The GPF statistic from @zhang_one-way_2014 integrates the pointwise
 F-ratio instead of integrating separately the pointwise within and
 between variations:
 $$\operatorname{GPF} = \int_a^b \frac{\operatorname{SSB}(x)/(G-1)}{\operatorname{SSW}(x)/(n-G)}dx.$$ {#eq-GPF}
@@ -494,12 +493,12 @@ Under the null hypothesis, this statistic is asymptotically equal to a
 linear combination of independent $\chi^2$, which can be approximated by
 a $\chi^2$-distribution [@zhang_one-way_2014, Proposition 1]. In the
 implementation of the `fdANOVA` package, `GPF` is divided by $b-a$, and
-the null distribution is modified accordingly. [@gorecki_fdanova_2018]
+the null distribution is modified accordingly. @gorecki_fdanova_2018
 (page 5) claim that the GPF test is more powerful than the F-type tests.
 
 #### $F_{\max}$ statistic {#f_max-statistic .unnumbered}
 
-The $F_{\max}$ statistic from [@zhang_new_2019] rather computes the
+The $F_{\max}$ statistic from @zhang_new_2019 rather computes the
 supremum of the pointwise F-ratio instead of integrating it as in `GPF`:
 $$F_{\max} = \sup_{x \in (a,b)} \frac{\operatorname{SSB}(x)/(G-1)}{\operatorname{SSW}(x)/(n-G)}.$$ {#eq-Fmax}
 We consider the implementation `Fmaxb` which bootstraps the distribution
@@ -547,7 +546,7 @@ anymore at the local level because the clr transform evaluated at $x$
 involves all values of the log density and not only its value at $x$.
 
 For these reasons, we now turn attention to some interpretation tools
-presented in [@maier_additive_2024] based on odds ratios.
+presented in @maier_additive_2024 based on odds ratios.
 
 For some subintervals $I \subset [a,b]$ we wish to compare the relative
 probability to be in $I$ versus its complement in $(a,b)$ between two
@@ -555,7 +554,7 @@ densities $\varphi_1$ and $\varphi_2$. Let us start with an
 infinitesimal comparison that only implies any two points $x,z$ in
 $(a,b)$.
 
-Given $\varphi_1$ and $\varphi_2$, [@maier_additive_2024, pp. 10 and 11,
+Given $\varphi_1$ and $\varphi_2$, @maier_additive_2024 [pp. 10 and 11,
 Proposition 3.1] define the infinitesimal odds ratios
 $\operatorname{OR}_{x\mid z}$ of $\varphi_2$ versus $\varphi_1$ as
 $$\operatorname{OR}_{x\mid z} = \frac{\frac{{\varphi}_2(x)}{{ \varphi}_2(z)}}{\frac{{\varphi}_1(x)}{{ \varphi}_1 (z)}}.$$ {#eq-ORdef1}
@@ -581,7 +580,7 @@ $\beta$.
 
 Let us now use these infinitesimal odds ratios to compare the densities
 on subintervals of $[a,b]$. Using part (a) of Proposition 3.1 in
-[@maier_additive_2024] which states that if
+@maier_additive_2024, which states that if
 $\operatorname{OR}_{x\mid z} (\beta) > 1$ for all $x,z$ when $x$ is in a
 given interval $A$ and $z$ in a given interval $B$, we may conclude that
 conditional on the underlying variable being in $A$ or $B$, the odds
@@ -632,7 +631,7 @@ temperatures as they are a direct indicator of heat stress on both
 humans and the environment. The data spans the years 1987 to 2016. In
 order to address the discrepancy between the geographical coordinates
 and the municipalities of Vietnam (63 provinces),
-[@espagne_impacts_2019] performed a spatial interpolation step from the
+@espagne_impacts_2019 performed a spatial interpolation step from the
 gridded data to the provincial level.
 
 This process results in 365 or 366 daily maximum temperature records for
@@ -657,7 +656,7 @@ regions in the north have four seasons: winter, spring, summer, and
 autumn, while some regions in the south experience two distinct seasons:
 the dry season (November to April) and the rainy season (May to October)
 [@trinh_impact_2021; @world_bank_group_climate_2021]. For example,
-according to [@trinh_impact_2021], during the period 1960-2000 winter
+according to @trinh_impact_2021, during the period 1960-2000 winter
 temperatures rose faster than those of the summer, and temperatures in
 the northern zones rose faster than in the southern zones. The objective
 of this application is first of all to determine whether there is a
@@ -719,7 +718,7 @@ vietnam_provinces |>
 ## Smoothing
 
 We will assume that the observed data arise from random densities,
-themselves sampled from an hypothesized and unknown distribution on a
+themselves sampled from a hypothesized and unknown distribution on a
 Bayes space. Since the elements of the Bayes spaces are density
 functions, whereas the observed data (usually samples of real-valued
 observations or histograms) is always discrete, a preprocessing step is
@@ -736,10 +735,10 @@ a polynomial spline.
 
 The process starts by the choice of a basis of normalized B-spline
 functions for the space $\mathcal S_d^\Delta (a,b) \subset L^2(a,b),$ of
-polynomial splines or order $d$ (degree less than or equal to $d-1$) and
+polynomial splines of order $d$ (degree less than or equal to $d-1$) and
 inside knots $\Delta = (\delta_1, \ldots, \delta_k)$, of dimension $d+k$
 [see @schumaker_spline_1981 for a complete description]. To accommodate
-the zero-integral constraint, [@machalova_preprocessing_2016] introduce
+the zero-integral constraint, @machalova_preprocessing_2016 introduce
 the ZB-spline functions, denoted by $Z_\ell(x), 1 \leq \ell \leq d+k-1$
 for the subspace
 $\mathcal Z_d^\Delta (a,b) = \mathcal S_d^\Delta (a,b) \cap L^2_0(a,b)$
@@ -747,7 +746,7 @@ of dimension $d+k-1$, the loss of one dimension being due to the
 zero-integral constraint. Finally the inverse clr of the ZB-spline basis
 functions, called the CB-spline basis functions, denoted by
 $C_\ell =\operatorname{clr}^{-1}(Z_\ell)$ generate the space
-$\mathcal C_d^\Delta (a,b),$ an Euclidean subspace of ${B}^2 (a,b)$ of
+$\mathcal C_d^\Delta (a,b),$ a Euclidean subspace of ${B}^2 (a,b)$ of
 dimension $k+d-1,$ made of compositional splines on $[a,b]$ of order $d$
 with knots sequence $\Delta.$ The expansion @eq-expan
 of a density $\pi_{gj}^{t}$ of the subspace $\mathcal C_d^\Delta (a,b)$
@@ -822,7 +821,7 @@ at time $t=t_0.$ When the slope density of this model is the uniform
 distribution on $(a,b)$, there is no observable trend in the evolution
 of temperature densities.
 
-For estimating the parameters of @eq-slopereg, as in [@talska_compositional_2018], the clr
+For estimating the parameters of @eq-slopereg, as in @talska_compositional_2018, the clr
 transformation is applied to @eq-slopereg and the resulting equation is that of a simple
 multivariate regression model which can be fitted by ordinary least
 squares. The fitted slopes seem to give a good approximation of the
@@ -890,7 +889,7 @@ vnt |> plot_funs(t_max, color = region_name) +
 
 In order to use our methodology, we will assume from now on that the
 $\beta_{gj}$ are independent. Using the tools introduced by
-[@menafoglio_kriging_2014], we evaluated the spatial dependence between
+@menafoglio_kriging_2014, we evaluated the spatial dependence between
 the slope densities and found it negligible.
 
 ## Regional one-sample tests
@@ -940,7 +939,7 @@ one_sample <- function(ddobj, p = 3) {
 ```
 
 ```{r tbl-one_sample_regional}
-#| tbl-cap: Sidak-adjusted $p$-values for the regional one-sample problems.
+#| tbl-cap: Šidák-adjusted $p$-values for the regional one sample test.
 one_sample_regional_tbl <- vnt |>
   select(region, region_name, t_max) |>
   summarise(t_max = list(c(t_max)), .by = c(region, region_name)) |>
@@ -962,7 +961,7 @@ kable_format(multiple_testing(one_sample_regional_tbl,
 ## Regional distributional ANOVA {#sec-reg_dist_anova}
 
 ```{r fig-slopes_regional_means}
-#| fig-cap: Regional mean trend slopes. The dotted line represents the uniform density on $[12^\circ\text C, 40^\circ\text C]$ which is the reference measure.}
+#| fig-cap: Regional mean trend slopes. The dotted line represents the uniform density on $[12^\circ\text C, 40^\circ\text C]$ which is the reference measure.
 #| fig-height: 14
 #| out-width: 50%
 vntr <- vnt |>
@@ -1061,7 +1060,7 @@ the most from the others in the sense that it is only connected by
 dotted lines.
 
 ```{r tbl-slopes_danova_pairwise}
-#| tbl-cap: Sidak-adjusted $p$-values for pairwise comparisons.
+#| tbl-cap: Šidák-adjusted $p$-values for pairwise group mean comparison.
 vntp <- t(combn(c("NMM", "RRD", "NCC", "CHR", "SR", "MDR"), m = 2))
 colnames(vntp) <- c("region1", "region2")
 
@@ -1255,9 +1254,7 @@ vntr |>
 ```
 
 ```{r tbl-interval_mountains}
-#| fig-cap: Levels for the North Central Coast (NCC) and Northern Midlands and Mountains (NMM) regions.
-#| fig-height: 6
-#| out-width: 50%
+#| tbl-cap: Levels for North Central Coast (NCC) and Northern Midlands and Mountains (NMM) regions.
 vnt_mountains_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
 ```
 
@@ -1309,9 +1306,7 @@ vntr |>
 ```
 
 ```{r tbl-interval_rrd}
-#| fig-cap: Levels for the Red River Delta (RRD) and Central Highlands (CHR) regions.
-#| fig-height: 6
-#| out-width: 50%
+#| tbl-cap: Levels for Red River Delta (RRD) and Central Highlands (CHR) regions.
 vnt_rrd_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
 ```
 
@@ -1361,11 +1356,8 @@ vntr |>
 ```
 
 ```{r tbl-interval_south}
-#| fig-cap: Levels for the Southeast (SR) and Mekong Delta (MDR) regions.
-#| fig-height: 6
-#| out-width: 50%
+#| tbl-cap: Levels for Southeast (SR) and Mekong Delta (MDR) regions.
 vnt_south_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
-
 ```
 
 @fig-interval_mountains, @fig-interval_rrd and @fig-interval_south
@@ -1425,7 +1417,7 @@ density is not uniform. Furthermore, when considering the functions
 globally, most of the DANOVA statistics strongly reject the null
 hypothesis, that is, the equality of trend slope density across the
 Vietnamese regions. For more local interpretations, we rely on the
-infinitesimal odds ratio of [@maier_additive_2025].
+infinitesimal odds ratio of @maier_additive_2025.
 
 Needless to say that the proposed methodology can be applied in other
 application frameworks. In our application, the inference has been
@@ -1437,7 +1429,7 @@ densities by time and a regional effect and to test the parameters of
 this model. In order to take into account the possible spatial
 dependence of the data set studied in this article, we could consider
 adapting the Spatial FANOVA methodology introduced by
-[@aristizabal_analysis_2019] to a distributional context.
+@aristizabal_analysis_2019 to a distributional context.
 
 Future research might try to reduce the uncertainty due to the low
 density of extreme temperatures, possibly weighting the domain of the
