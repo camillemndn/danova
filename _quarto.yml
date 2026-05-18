@@ -23,8 +23,6 @@ format:
     theme: cosmo
     code-fold: true
     css: styles.css
-    execute:
-      echo: true
     fig-format: jpeg
     include-in-header:
       text: |
