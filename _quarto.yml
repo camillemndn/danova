@@ -23,6 +23,8 @@ format:
     theme: cosmo
     code-fold: true
     css: styles.css
+    execute:
+      echo: true
     fig-format: jpeg
     include-in-header:
       text: |
@@ -35,7 +37,6 @@ format:
       - backref=true
     cite-method: biblatex
     colorlinks: false
-    echo: false
     fig-format: pdf
     fig-pos: ht
     link-citations: true
