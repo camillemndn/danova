@@ -15,14 +15,10 @@ link-external-newwindow: true
 mermaid:
   theme: default
 number-sections: true
-knitr:
-  opts_chunk:
-    warning: false
-    message: false
 
 format:
   html:
-    theme: cosmo
+    theme: zephyr
     code-tools:
       source: https://github.com/camillemndn/danova
     css: styles.css

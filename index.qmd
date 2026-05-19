@@ -343,7 +343,7 @@ Two test statistics are available: the $L^2$-norm test statistic
 [@kokoszka_introduction_2017]. We now adapt them to our density
 framework.
 
-#### $L^2$-norm approach {#l2-norm-approach .unnumbered}
+#### $L^2$-norm approach {.unnumbered}
 
 We consider the following statistic defined in the Bayes space by
 $$\begin{split}
@@ -428,7 +428,7 @@ is equivalent to
 $$H_0: \forall g, \quad {\mathbb E} (\operatorname{clr}\varphi_{gj}) = {\mathbb E} (\operatorname{clr}\varphi_{1j}).$$
 In order to adapt FANOVA to DANOVA, we can thus simply apply the FANOVA
 techniques to the clr transformed densities in the functional space
-$L^2_0.$ The [R]{.sans-serif} package `fdANOVA` [described in @gorecki_fdanova_2019] provides several FANOVA options and we focus on
+$L^2_0.$ The `R` package `fdANOVA` [described in @gorecki_fdanova_2019] provides several FANOVA options and we focus on
 the following five test statistics. Their evaluation requires the
 computation of the following quantities: the pointwise variations
 $\operatorname{SSB}(x)$ and $\operatorname{SSW}(x)$ from @eq-SSBlocBayes and
@@ -437,7 +437,7 @@ group means for the statistic proposed by @cuevas_anova_2004. Let us
 briefly describe the five test statistics and try to provide when
 possible a Bayes space expression.
 
-#### $\operatorname{L^2B}$ statistic {#operatornamel2b-statistic .unnumbered}
+#### $\operatorname{L^2B}$ statistic {.unnumbered}
 
 We adapt the $L^2$-norm based test statistic given in the framework of
 FANOVA [@zhang_statistical_2007] to the context of densities:
@@ -451,7 +451,7 @@ equality. In the @gorecki_fdanova_2019 `fdANOVA` `R`
 package, the `L2B` implementation uses an asymptotic distribution of the
 test statistic.
 
-#### $\operatorname{FB}$ statistic {#operatornamefb-statistic .unnumbered}
+#### $\operatorname{FB}$ statistic {.unnumbered}
 
 The F-type tests from @shen_f_2004 and @zhang_statistical_2011 use
 both within and between variation:
@@ -469,7 +469,7 @@ Fisher distribution [@zhang_statistical_2011, Theorem 1 and equation
 However, @van_den_boogaart_bayes_2014 use a bootstrap procedure rather
 than the above approximation.
 
-#### $\operatorname{CS}$ statistic {#operatornamecs-statistic .unnumbered}
+#### $\operatorname{CS}$ statistic {.unnumbered}
 
 The CS statistic from @cuevas_anova_2004 uses pairwise differences.
 When applied to clr of densities, due to the linearity of
@@ -483,7 +483,7 @@ heteroscedastic assumption and parametric bootstrap. Note that an
 alternative formula for CS is the sum of the Bayes norms of all pairwise
 differences between groups.
 
-#### $\operatorname{GPF}$ statistic {#operatornamegpf-statistic .unnumbered}
+#### $\operatorname{GPF}$ statistic {.unnumbered}
 
 The GPF statistic from @zhang_one-way_2014 integrates the pointwise
 F-ratio instead of integrating separately the pointwise within and
@@ -496,7 +496,7 @@ implementation of the `fdANOVA` package, `GPF` is divided by $b-a$, and
 the null distribution is modified accordingly. @gorecki_fdanova_2018
 (page 5) claim that the GPF test is more powerful than the F-type tests.
 
-#### $F_{\max}$ statistic {#f_max-statistic .unnumbered}
+#### $F_{\max}$ statistic {.unnumbered}
 
 The $F_{\max}$ statistic from @zhang_new_2019 rather computes the
 supremum of the pointwise F-ratio instead of integrating it as in `GPF`:
@@ -668,24 +668,20 @@ describe the changes in regional temperature distributions in some
 subintervals of the temperature range.
 
 ```{r setup}
-#| include: false
 source("setup.R")
-```
 
-```{r fig-map}
-#| fig-cap: Map of the provinces of Vietnam colored by region.
-#| fig-height: 7
-#| warning: false
-#| message: false
-library(boot)
-library(CompQuadForm)
-library(dda)
-library(fdANOVA)
-library(fda.usc)
-library(MVN)
-library(sf)
-library(tidyverse)
-library(colorspace)
+suppressMessages(suppressWarnings({
+  library(boot)
+  library(CompQuadForm)
+  library(dda)
+  library(fdANOVA)
+  library(fda.usc)
+  library(MVN)
+  library(sf)
+  library(tidyverse)
+  library(colorspace)
+}))
+
 set.seed(10983)
 
 data(vietnam_temperature_dd)
@@ -706,7 +702,11 @@ vietnam_regions$code <- factor(vietnam_regions$code, levels = lat_order_code)
 vietnam_temperature_dd$region <- factor(vietnam_temperature_dd$region,
   levels = lat_order_code
 )
+```
 
+```{r fig-map}
+#| fig-cap: Map of the provinces of Vietnam colored by region.
+#| fig-height: 7
 vietnam_provinces |>
   left_join(vietnam_regions, by = c("region" = "code")) |>
   rename(region_name = name) |>
@@ -726,8 +726,7 @@ functions, whereas the observed data (usually samples of real-valued
 observations or histograms) is always discrete, a preprocessing step is
 necessary to transform the observed samples or histograms into a sample
 of probability density functions. We will follow the preprocessing
-procedure of
-[@machalova_preprocessing_2016; @machalova_compositional_2021] to
+procedure of [@machalova_preprocessing_2016;  @machalova_compositional_2021] to
 transform our yearly samples of maximum temperatures at the province
 level into density functions that we assume to belong to a
 finite-dimensional subspace $\mathcal C_q^\Delta (a,b)$ of the Bayes
@@ -789,8 +788,8 @@ vntry <- vietnam_temperature_dd |>
   rename(region_name = name) |>
   arrange(region, province) |>
   select(!province) |>
-  group_by(region, region_name, year) |>
-  summarise(t_max = mean(t_max))
+  ungroup() |>
+  summarise(t_max = mean(t_max), .by = c(region, region_name, year))
 
 vntry |>
   plot_funs(t_max, color = year) +
@@ -965,8 +964,7 @@ kable_format(multiple_testing(one_sample_regional_tbl,
 #| fig-height: 5
 vntr <- vnt |>
   select(!province) |>
-  group_by(region, region_name) |>
-  summarise(t_max = mean(t_max))
+  summarise(t_max = mean(t_max), .by = c(region, region_name))
 
 vntr |> plot_funs(t_max, color = region_name) +
   geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
@@ -1076,10 +1074,6 @@ pairwise_anova <- function(region1, region2) {
   res[as_vector(stat_list)] |>
     sapply(function(x) c(x$pval)) |>
     c()
-}
-
-multiple_testing <- function(tbl, m) {
-  mutate(tbl, across(where(is.numeric), ~ 1 - (1 - .x)^m))
 }
 
 pairwise_tbl <- as_tibble(vntp) |>
