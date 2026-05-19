@@ -670,12 +670,15 @@ subintervals of the temperature range.
 ```{r setup}
 #| include: false
 #| echo: false
+#| purl: false
 source("setup.R")
 ```
 
 ```{r fig-map}
 #| fig-cap: Map of the provinces of Vietnam colored by region.
 #| fig-height: 7
+#| warning: false
+#| message: false
 library(boot)
 library(CompQuadForm)
 library(dda)
@@ -1089,6 +1092,7 @@ pairwise_tbl <- as_tibble(vntp) |>
 kable_format(multiple_testing(pairwise_tbl, m = nrow(pairwise_tbl)))
 ```
 
+::: {.content-visible when-format="html"}
 ```{mermaid}
 %%| label: fig-slopes_danova_pairwise_diagram
 %%| fig-cap: "Summary of pairwise tests between regions of Vietnam. Solid line: no test rejects the null hypothesis; dotted line: some tests reject the null hypothesis; absence of line: all tests reject the null hypothesis."
@@ -1111,6 +1115,11 @@ style CHR fill:#ac337b,stroke:#000
 style SR fill:#ea5662,stroke:#000
 style MDR fill:#ff9f6f,stroke:#000
 ```
+:::
+
+::: {.content-visible unless-format="html"}
+![Summary of pairwise tests between regions of Vietnam. Solid line: no test rejects the null hypothesis; dotted line: some tests reject the null hypothesis; absence of line: all tests reject the null hypothesis.](fig-slopes_danova_pairwise_diagram.pdf){#fig-slopes_danova_pairwise_diagram height=45%}
+:::
 
 ## Interpreting regional changes in temperature distributions {#sec-regional_interpretation}
 

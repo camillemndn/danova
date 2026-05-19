@@ -1,5 +1,6 @@
 project:
   type: manuscript
+  pre-render: bash mermaid-to-pdf.sh
 
 bibliography: references.bib
 cache: true
@@ -8,14 +9,15 @@ df-print: kable
 fig-align: center
 fig-width: 7
 fig-height: 4
-fig-dpi: 300
+fig-dpi: 600
 lang: en
 lightbox: true
 link-external-newwindow: true
 mermaid:
   theme: default
-notebook-links: false
 number-sections: true
+warning: false
+message: false
 
 format:
   html:
@@ -23,10 +25,6 @@ format:
     code-tools:
       source: https://github.com/camillemndn/danova
     css: styles.css
-    execute:
-      echo: true
-      warning: false
-      message: false
     fig-format: jpeg
     include-in-header:
       text: |
@@ -42,11 +40,5 @@ format:
     fig-format: pdf
     fig-pos: ht
     link-citations: true
+    mermaid-format: png
     pdf-engine: pdflatex
-
-knitr:
-  opts_chunk:
-    collapse: true
-    warning: false
-    message: false
-    comment: "#>"

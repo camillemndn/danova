@@ -63,6 +63,8 @@ _manuscript
 /.quarto/
 *.nc
 *_libs
+*.rmarkdown
+*.aux
 
 result*
 .pre-commit-config.yaml

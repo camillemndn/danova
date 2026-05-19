@@ -78,12 +78,11 @@ in
 rec {
   devShells.default = pkgs.mkShell {
     nativeBuildInputs = with pkgs; [
-      npins
+      lon
+      mermaid-cli
       (quarto.override { extraRPackages = r-deps; })
       (rWrapper.override { packages = r-deps; })
       texliveFull
-      librsvg
-      chromium
     ];
     shellHook = ''
       ${pre-commit-hook.shellHook}
@@ -94,9 +93,9 @@ rec {
     website = pkgs.callPackage (
       {
         stdenv,
-        chromium,
         glibcLocales,
         image_optim,
+        mermaid-cli,
         quarto,
         texliveFull,
         which,
@@ -108,9 +107,9 @@ rec {
         src = builtins.fetchGit ./.;
 
         buildInputs = [
-          chromium
           glibcLocales
           image_optim
+          mermaid-cli
           (quarto.override { extraRPackages = r-deps; })
           texliveFull
           which
@@ -119,9 +118,10 @@ rec {
         LOCALE_ARCHIVE = "${pkgs.glibcLocales}/lib/locale/locale-archive";
         LC_ALL = "en_US.UTF-8";
         HOME = ".";
+        QUARTO_CHROMIUM = "${pkgs.coreutils}/bin/true";
 
         buildPhase = ''
-          quarto render index.qmd --to html
+          quarto render
           image_optim --recursive _manuscript
         '';
 
