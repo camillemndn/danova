@@ -5,6 +5,10 @@ let
     inherit system;
     overlays = [
       (_: prev: {
+        quarto = prev.quarto.overrideAttrs (old: {
+          patches = (old.patches or [ ]) ++ [ ./mermaid-pdf.patch ];
+        });
+
         rPackages = prev.rPackages.override {
           overrides = with prev.rPackages; {
             colorout = buildRPackage {
@@ -118,7 +122,6 @@ rec {
         LOCALE_ARCHIVE = "${pkgs.glibcLocales}/lib/locale/locale-archive";
         LC_ALL = "en_US.UTF-8";
         HOME = ".";
-        QUARTO_CHROMIUM = "${pkgs.coreutils}/bin/true";
 
         buildPhase = ''
           quarto render

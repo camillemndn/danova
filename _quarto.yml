@@ -1,6 +1,5 @@
 project:
   type: manuscript
-  pre-render: bash mermaid-to-pdf.sh
 
 bibliography: references.bib
 cache: true
@@ -40,5 +39,6 @@ format:
     fig-format: pdf
     fig-pos: ht
     link-citations: true
-    mermaid-format: png
+    mermaid-format: pdf
+    notebook-links: false
     pdf-engine: pdflatex
