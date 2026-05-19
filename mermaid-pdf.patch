@@ -9,7 +9,7 @@
      theme:
        anyOf:
          - null
-@@ -120134,6 +120134,44 @@
+@@ -120134,6 +120134,48 @@
          );
        }
      };
@@ -21,9 +21,13 @@
 +      );
 +      const mmdFile = fullName.replace(/\.pdf$/, ".mmd");
 +      const svgFile = fullName.replace(/\.pdf$/, ".svg");
++      const puppeteerCfg = fullName.replace(/\.pdf$/, "-puppeteer.json");
 +      Deno.writeTextFileSync(mmdFile, cellContent2.value);
++      Deno.writeTextFileSync(puppeteerCfg, JSON.stringify({
++        args: ["--no-sandbox", "--allow-file-access-from-files", "--disable-web-security"]
++      }));
 +      const mmdcSvg = new Deno.Command("mmdc", {
-+        args: ["-i", mmdFile, "--outputFormat=svg", "-o", svgFile],
++        args: ["-i", mmdFile, "--outputFormat=svg", "-p", puppeteerCfg, "-o", svgFile],
 +        stdout: "inherit",
 +        stderr: "inherit"
 +      });
@@ -33,7 +37,7 @@
 +      }
 +      const svgText = Deno.readTextFileSync(svgFile);
 +      const mmdcPdf = new Deno.Command("mmdc", {
-+        args: ["-i", mmdFile, "--outputFormat=pdf", "--pdfFit", "-o", fullName],
++        args: ["-i", mmdFile, "--outputFormat=pdf", "--pdfFit", "-p", puppeteerCfg, "-o", fullName],
 +        stdout: "inherit",
 +        stderr: "inherit"
 +      });
@@ -54,7 +58,7 @@
      const makeJs = async () => {
        setupMermaidJsRuntime();
        const preAttrs = [];
-@@ -120185,6 +120223,8 @@
+@@ -120185,6 +120227,8 @@
        return await makeSvg();
      } else if (format14 === "png") {
        return await makePng();
