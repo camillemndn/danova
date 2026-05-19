@@ -15,8 +15,10 @@ link-external-newwindow: true
 mermaid:
   theme: default
 number-sections: true
-warning: false
-message: false
+knitr:
+  opts_chunk:
+    warning: false
+    message: false
 
 format:
   html:
