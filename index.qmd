@@ -669,6 +669,7 @@ subintervals of the temperature range.
 
 ```{r setup}
 #| include: false
+#| echo: false
 source("setup.R")
 ```
 

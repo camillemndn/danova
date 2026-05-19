@@ -16,15 +16,17 @@ mermaid:
   theme: default
 notebook-links: false
 number-sections: true
-warning: false
 
 format:
   html:
     theme: cosmo
-    code-fold: true
+    code-tools:
+      source: https://github.com/camillemndn/danova
     css: styles.css
     execute:
       echo: true
+      warning: false
+      message: false
     fig-format: jpeg
     include-in-header:
       text: |
@@ -43,9 +45,8 @@ format:
     pdf-engine: pdflatex
 
 knitr:
-  opts_knit:
+  opts_chunk:
     collapse: true
-    comment: "#>"
     warning: false
-    dev.args: list(bg = "white")
-    root.dir: ./
+    message: false
+    comment: "#>"

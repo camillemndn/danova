@@ -95,6 +95,7 @@ rec {
       {
         stdenv,
         chromium,
+        glibcLocales,
         image_optim,
         quarto,
         texliveFull,
@@ -108,12 +109,15 @@ rec {
 
         buildInputs = [
           chromium
+          glibcLocales
           image_optim
           (quarto.override { extraRPackages = r-deps; })
           texliveFull
           which
         ];
 
+        LOCALE_ARCHIVE = "${pkgs.glibcLocales}/lib/locale/locale-archive";
+        LC_ALL = "en_US.UTF-8";
         HOME = ".";
 
         buildPhase = ''
