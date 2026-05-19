@@ -215,7 +215,7 @@ Two test statistics are available: the $L^2$-norm test statistic
 
 ## Reminders on functional analysis of variance {#sec-reminders_fanova}
 
-In the classical framework [@zhang_analysis_2013 p. 144] of functional
+In the classical framework [@zhang_analysis_2013, p. 144] of functional
 analysis of variance, or simply FANOVA, we observe $G$ independent
 functional samples, denoted by $(f_{g1}, \ldots, f_{gn_g})$ for
 $1 \leq g \leq G$, from stochastic processes with values in $L^2(a,b)$,
@@ -253,7 +253,7 @@ procedure as in @ramsay_functional_2005 or a bootstrap procedure as in @zhang_ne
 ## Reminders on distributional data analysis and Bayes spaces {#sec-remind_dda}
 
 @egozcue_hilbert_2006 and
-@van_den_boogaart_bayes_2010 and @van_den_boogaart_bayes_2014 define the
+@van_den_boogaart_bayes_2010 [-@van_den_boogaart_bayes_2014] define the
 Bayes spaces of probability density functions relative to a reference
 measure $\lambda$ on an interval of $\mathbb R$, in a similar fashion as
 $L^2(\lambda)$ spaces. In the following, the measure $\lambda$ will be
@@ -304,10 +304,10 @@ ${B}^2(a,b)$, one can define the expected value in the Bayes space as:
 $$
 \mathbb{E}^B(\varphi) = \operatorname{clr}^{-1} (\mathbb E [\operatorname{clr}(\varphi)])$$ {#eq-expB}
 and the covariance operator, for $\psi \in B^2(a,b)$, by:
-$$\begin{gathered}
-\operatorname{Cov}^B [\varphi] (\psi) = \operatorname{clr}^{-1} (\operatorname{Cov} [\operatorname{clr} \varphi] (\operatorname{clr} \psi)) =  \\
-\mathbb{E}^B \left[ \langle\varphi \ominus \mathbb E ^B (\varphi), \psi \rangle_{B^2} \odot \left( \varphi \ominus \mathbb E^B (\varphi) \right) \right].
-\end{gathered}$$ {#eq-covB}
+$$\begin{split}
+\operatorname{Cov}^B [\varphi] (\psi) &= \operatorname{clr}^{-1} (\operatorname{Cov} [\operatorname{clr} \varphi] (\operatorname{clr} \psi)) \\
+&= \mathbb{E}^B \left[ \langle\varphi \ominus \mathbb E ^B (\varphi), \psi \rangle_{B^2} \odot \left( \varphi \ominus \mathbb E^B (\varphi) \right) \right].
+\end{split}$$ {#eq-covB}
 
 # Testing and interpreting mean densities in the Bayes space {#sec-global}
 
@@ -346,9 +346,10 @@ framework.
 #### $L^2$-norm approach {#l2-norm-approach .unnumbered}
 
 We consider the following statistic defined in the Bayes space by
-$$\begin{aligned}
-     T_\text{norm}&= &n \| \bar{\varphi}_{.} - \varphi_0 \|^2_{B^2(a,b)}\\&=& n \| \operatorname{clr} (\bar{\varphi}_{.}) - \operatorname{clr} (\varphi_0) \|^2_{L^2_0(a,b)},
-\end{aligned}$$
+$$\begin{split}
+T_\text{norm} &= n \| \bar{\varphi}_{.} - \varphi_0 \|^2_{B^2(a,b)} \\
+&= n \| \operatorname{clr} (\bar{\varphi}_{.}) - \operatorname{clr} (\varphi_0) \|^2_{L^2_0(a,b)},
+\end{split}$$
 where $\bar{\varphi}_{.}$ denotes the sample mean of the
 densities in $B^2(a,b)$. We can see that it does correspond to an
 $L^2$-norm statistic to test the equality in $L^2_0$ of the clr
@@ -371,13 +372,12 @@ unknown eigenvalues, @kokoszka_introduction_2017 propose to truncate
 the Functional Principal Component Analysis (FPCA) and use a
 Hotelling-type test statistic. It turns out that this statistic applied
 to the clr-transformed densities coincides with that obtained with the
-simplicial FPCA in $B^2(a,b)$ from [@hron_simplicial_2016]. Keeping the
+simplicial FPCA in $B^2(a,b)$ from @hron_simplicial_2016. Keeping the
 first $p$ terms, the statistic $T_{\operatorname{PC}}$ is given by
-$$\begin{aligned}
-    T_{\operatorname{PC}}
-    &=& n\sum_{k=1}^p \frac{\langle \operatorname{clr} (\bar{\varphi}_{.}) - \operatorname{clr} (\varphi_0), \hat{v}_k \rangle_{L^2_0(a,b)}^2}{\hat \lambda_k} \nonumber \\
-    &=& n\sum_{k=1}^p \frac{\langle \bar{\varphi}_{.} \ominus \varphi_0, \operatorname{clr}^{-1}(\hat{v}_k) \rangle_{B^2(a,b)}^2}{\hat \lambda_k}.
-\end{aligned}$$
+$$\begin{split}
+T_{\operatorname{PC}} &= n\sum_{k=1}^p \frac{\langle \operatorname{clr} (\bar{\varphi}_{.}) - \operatorname{clr} (\varphi_0), \hat{v}_k \rangle_{L^2_0(a,b)}^2}{\hat \lambda_k} \\
+&= n\sum_{k=1}^p \frac{\langle \bar{\varphi}_{.} \ominus \varphi_0, \operatorname{clr}^{-1}(\hat{v}_k) \rangle_{B^2(a,b)}^2}{\hat \lambda_k}.
+\end{split}$$
 where $\hat\lambda_k$ are the estimated non-null
 eigenvalues and $\hat v_k$ the corresponding estimated eigenfunctions in
 $L^2_0(a,b)$ from the FPCA. The limiting distribution of
@@ -566,11 +566,13 @@ points $x$ and $z$ in $(a,b)$. Indeed, we can first
 rewrite the double ratio differently with $x$ in the top ratio and $z$
 in the bottom one and then use the fact that the integral of the
 numerator is the same as that of the denominator:
-$$\begin{aligned}
-\operatorname{OR}_{x\mid z}&=& \frac{\frac{\varphi_2(x)}{\varphi_1(x)}}{ \frac{\varphi_2(z)}{ \varphi_1 (z)}}=
- \frac{{\cal C}(\frac{\varphi_2(x)}{\varphi_1(x)})}{{\cal C}(\frac{\varphi_2(z)}{\varphi_1(z)})}\nonumber\\
-&=& \frac{{\varphi}_2(x) \ominus { \varphi}_1(x)}{{ \varphi}_2(z) \ominus{ \varphi}_1(z)}= \frac{\beta (x)}{\beta (z)}.
-\end{aligned}$$ {#eq-ORdef2}
+$$\begin{split}
+\operatorname{OR}_{x\mid z}
+&= \frac{\frac{\varphi_2(x)}{\varphi_1(x)}}{ \frac{\varphi_2(z)}{ \varphi_1 (z)}}
+= \frac{{\cal C}(\frac{\varphi_2(x)}{\varphi_1(x)})}{{\cal C}(\frac{\varphi_2(z)}{\varphi_1(z)})} \\
+&= \frac{{\varphi}_2(x) \ominus { \varphi}_1(x)}{{ \varphi}_2(z) \ominus{ \varphi}_1(z)}
+= \frac{\beta (x)}{\beta (z)}.
+\end{split}$$ {#eq-ORdef2}
 where $\cal C$ denotes the closure operator whose
 definition is recalled in @sec-remind_dda.
 This justifies that we write the infinitesimal odds ratios between two
@@ -762,16 +764,16 @@ that the coefficients are the same in the two equations. The
 coefficients of the global sample mean and regional sample means, needed
 to compute the pointwise between-groups and within-groups mean square
 error, are readily obtained by
-$$\begin{aligned}
+$$\begin{split}
 \operatorname{clr} \bar{\pi}^{t}_{g.}(x) &= \frac{1}{n_g} \sum_{i=1}^{n_g} \operatorname{clr} \pi_{gj}^{t}(x) \\
 &= \frac{1}{n_g} \sum_{i=1}^{n_g} \sum_{\ell=1}^{d+m-1} \left[\pi_{gj}^{t}\right]^{C_\ell} \cdot Z_\ell(x) \\
 &= \sum_{\ell=1}^{d+m-1} \left( \frac{1}{n_g} \sum_{i=1}^{n_g}\left[\pi_{gj}^{t}\right]^{C_\ell} \right) \cdot Z_\ell(x),
-\end{aligned}$$ {#eq-grpmean}
+\end{split}$$ {#eq-grpmean}
 and similarly
 $$\operatorname{clr} \bar{\pi}_{..}(x) = \sum_{\ell=1}^{d+m-1} \left(\frac{1}{G}
 \sum_{g=1}^G \frac{1}{n_g} \sum_{i=1}^{n_g} \left[\pi_{gj}^{t}\right]^{C_\ell} \right) \cdot Z_\ell(x).$$ {#eq-globalmean}
 
-As in [@machalova_preprocessing_2016], after summarizing the initial
+As in @machalova_preprocessing_2016, after summarizing the initial
 temperature samples using histograms, penalized least squares splines
 are applied to smooth the data, treating the histogram bin centers as
 the first coordinates and the corresponding relative frequencies as the
@@ -1037,10 +1039,8 @@ summarize and visualize these results on @fig-slopes_danova_pairwise_diagram by 
 
 1.  a solid line between two regions when none of the five tests reject
     the equality of mean slope densities
-
 2.  a dotted line between two regions when the equality of mean slope
     densities is rejected by some but not all of the five tests
-
 3.  no line between two regions when the equality of mean slope
     densities is rejected by all five tests.
 
@@ -1433,7 +1433,7 @@ adapting the Spatial FANOVA methodology introduced by
 
 Future research might try to reduce the uncertainty due to the low
 density of extreme temperatures, possibly weighting the domain of the
-Bayes space as in [@talska_weighting_2020]. Our local investigations
+Bayes space as in @talska_weighting_2020. Our local investigations
 remain exploratory, and elevating them to formal tests presents an
 interesting avenue for future research.
 
