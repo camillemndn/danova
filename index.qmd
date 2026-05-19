@@ -799,7 +799,7 @@ vntry |>
   scale_y_continuous(n.breaks = 4) +
 	scale_color_viridis_c(end = 0.8) +
   labs(
-    x = "Temperature (deg. Celsius)",
+    x = "Temperature (°C)",
     y = "Density",
     color = "Year"
   )
@@ -882,7 +882,7 @@ vnt |> plot_funs(t_max, color = region_name) +
   theme(legend.position = "none") +
   geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
   labs(
-    x = "Temperature (deg. Celsius)",
+    x = "Temperature (°C)",
     y = "Density"
   )
 ```
@@ -975,7 +975,7 @@ vntr |> plot_funs(t_max, color = region_name) +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   labs(
-    x = "Temperature (deg. Celsius)",
+    x = "Temperature (°C)",
     y = "Density"
   )
 ```
@@ -1244,7 +1244,7 @@ vntr |>
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   labs(
-    x = "Temperature (deg. Celsius)",
+    x = "Temperature (°C)",
     y = "Density"
   )
 ```
@@ -1295,7 +1295,7 @@ vntr |>
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   labs(
-    x = "Temperature (deg. Celsius)",
+    x = "Temperature (°C)",
     y = "Density"
   )
 ```
@@ -1344,7 +1344,7 @@ vntr |>
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
   labs(
-    x = "Temperature (deg. Celsius)",
+    x = "Temperature (°C)",
     y = "Density"
   )
 ```
