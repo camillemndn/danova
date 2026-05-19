@@ -674,8 +674,7 @@ source("setup.R")
 
 ```{r fig-map}
 #| fig-cap: Map of the provinces of Vietnam colored by region.
-#| fig-height: 9
-#| out-width: 50%
+#| fig-height: 7
 library(boot)
 library(CompQuadForm)
 library(dda)
@@ -711,7 +710,6 @@ vietnam_provinces |>
   rename(region_name = name) |>
   ggplot(aes(fill = region_name)) +
   scale_fill_viridis_d(option = "magma", end = 0.8) +
-  theme_legend_inside +
   geom_sf() +
   scale_x_continuous(breaks = seq(from = -180, to = 180, by = 2)) +
   labs(x = "Longitude", y = "Latitude", fill = "Region")
@@ -783,8 +781,7 @@ patterns in the temperature distributions.
 
 ```{r fig-smoothing}
 #| fig-cap: Densities of maximum temperature across the years 1987 to 2016.
-#| fig-height: 14
-#| out-width: 50%
+#| fig-height: 5
 vntry <- vietnam_temperature_dd |>
   left_join(vietnam_regions, by = c("region" = "code")) |>
   rename(region_name = name) |>
@@ -795,7 +792,7 @@ vntry <- vietnam_temperature_dd |>
 
 vntry |>
   plot_funs(t_max, color = year) +
-  facet_grid(vars(region), axes = "all") +
+  facet_wrap(vars(region), nrow = 2, axes = "all") +
   scale_linewidth(range = c(0.1, 1.2)) +
   scale_y_continuous(n.breaks = 4) +
 	scale_color_viridis_c(end = 0.8) +
@@ -841,8 +838,7 @@ region.
 
 ```{r fig-slopes}
 #| fig-cap: Trends slopes of provinces grouped by region. The dotted line represents the uniform density on $[12^\circ\text C, 40^\circ\text C]$ which is the reference measure.
-#| fig-height: 14
-#| out-width: 50%
+#| fig-height: 5
 to_slope <- function(ddobj, t = seq_len(ncol(ddobj$coefs))) {
   model <- lm(t(ddobj$coefs) ~ t)
 
@@ -878,7 +874,7 @@ vnt <- vietnam_temperature_dd |>
 class(vnt$t_max) <- c("ddl", "fdl", "list")
 
 vnt |> plot_funs(t_max, color = region_name) +
-  facet_grid(vars(region), axes = "all") +
+  facet_wrap(vars(region), nrow = 2, axes = "all") +
   scale_color_viridis_d(option = "magma", end = 0.8) +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
@@ -964,8 +960,7 @@ kable_format(multiple_testing(one_sample_regional_tbl,
 
 ```{r fig-slopes_regional_means}
 #| fig-cap: Regional mean trend slopes. The dotted line represents the uniform density on $[12^\circ\text C, 40^\circ\text C]$ which is the reference measure.
-#| fig-height: 14
-#| out-width: 50%
+#| fig-height: 5
 vntr <- vnt |>
   select(!province) |>
   group_by(region, region_name) |>
@@ -973,7 +968,7 @@ vntr <- vnt |>
 
 vntr |> plot_funs(t_max, color = region_name) +
   geom_hline(yintercept = 1 / diff(vnt$t_max[[1]]$basis$rangeval), linetype = "dotted") +
-  facet_grid(vars(region), axes = "all") +
+  facet_wrap(vars(region), nrow = 2, axes = "all") +
   scale_color_viridis_d(option = "magma", end = 0.8) +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
@@ -1096,7 +1091,7 @@ kable_format(multiple_testing(pairwise_tbl, m = nrow(pairwise_tbl)))
 ```{mermaid}
 %%| label: fig-slopes_danova_pairwise_diagram
 %%| fig-cap: "Summary of pairwise tests between regions of Vietnam. Solid line: no test rejects the null hypothesis; dotted line: some tests reject the null hypothesis; absence of line: all tests reject the null hypothesis."
-%%| out-width: 50%
+%%| out-width: 60%
 flowchart TB
   NMM([NMM]) ~~~ MDR([MDR])
   NMM <-.-> SR([SR])
@@ -1199,8 +1194,7 @@ fsolve.fd <- function(fdobj, k,
 
 ```{r fig-interval_mountains}
 #| fig-cap: Mean slope densities of North Central Coast (NCC) and Northern Midlands and Mountains (NMM) regions with levels.
-#| fig-height: 6
-#| out-width: 50%
+#| fig-height: 3
 thres1 <- 0.5 * (fmax(vntr$t_max[[1]], 30, 35) + fmin(vntr$t_max[[1]], 20, 30))
 thres3 <- 0.5 * (fmax(vntr$t_max[[3]], 30, 35) + fmin(vntr$t_max[[3]], 20, 30))
 
@@ -1243,7 +1237,7 @@ vntr |>
   plot_funs(t_max) +
   geom_vline(data = vnt_mountains_thresholds, aes(xintercept = x, color = y, linetype = -y)) +
   geom_hline(data = vnt_mountains_thresholds, aes(yintercept = y, color = y, linetype = -y)) +
-  facet_grid(vars(region), axes = "all") +
+  facet_wrap(vars(region), nrow = 1, axes = "all") +
   scale_linetype_binned() +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
@@ -1260,8 +1254,7 @@ vnt_mountains_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
 
 ```{r fig-interval_rrd}
 #| fig-cap: Mean slope densities of Red River Delta (RRD) and Central Highlands (CHR) regions with levels.
-#| fig-height: 6
-#| out-width: 50%
+#| fig-height: 3
 vnt_rrd_thresholds <- rbind(tibble(
   region = "RRD",
   x = c(
@@ -1295,7 +1288,7 @@ vntr |>
   plot_funs(t_max) +
   geom_vline(data = vnt_rrd_thresholds, aes(xintercept = x, color = y, linetype = -y)) +
   geom_hline(data = vnt_rrd_thresholds, aes(yintercept = y, color = y, linetype = -y)) +
-  facet_grid(vars(region), axes = "all") +
+  facet_wrap(vars(region), nrow = 1, axes = "all") +
   scale_linetype_binned() +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
@@ -1312,8 +1305,7 @@ vnt_rrd_thresholds |> mutate(x = signif(x, 3), y = signif(y, 3))
 
 ```{r fig-interval_south}
 #| fig-cap: Mean slope densities of Southeast (SR) and Mekong Delta (MDR) regions with levels.
-#| fig-height: 6
-#| out-width: 50%
+#| fig-height: 3
 vnt_south_thresholds <- rbind(tibble(
   region = "SR",
   x = c(
@@ -1345,7 +1337,7 @@ vntr |>
   plot_funs(t_max) +
   geom_vline(data = vnt_south_thresholds, aes(xintercept = x, color = y, linetype = -y)) +
   geom_hline(data = vnt_south_thresholds, aes(yintercept = y, color = y, linetype = -y)) +
-  facet_grid(vars(region), axes = "all") +
+  facet_wrap(vars(region), nrow = 1, axes = "all") +
   scale_linetype_binned() +
   scale_y_continuous(n.breaks = 4) +
   theme(legend.position = "none") +
