@@ -50,9 +50,7 @@ let
     dda
     fda_usc
     fdANOVA
-    gstat
     MVN
-    reshape2
     sf
     tidyverse
 
