@@ -91,6 +91,10 @@ keywords:
 citation:
   type: article-journal
   container-title: Stochastic Environmental Research and Risk Assessment
+fig-width: 7
+fig-height: 4
+code-tools:
+  source: https://github.com/camillemndn/danova
 ---
 
 # Introduction

@@ -6,8 +6,6 @@ cache: true
 citation: true
 df-print: kable
 fig-align: center
-fig-width: 7
-fig-height: 4
 fig-dpi: 600
 lang: en
 lightbox: true
@@ -19,13 +17,11 @@ number-sections: true
 format:
   html:
     theme: zephyr
-    code-tools:
-      source: https://github.com/camillemndn/danova
     css: styles.css
     fig-format: jpeg
     include-in-header:
       text: |
-        <script defer data-domain="camillemondon.com" src="https://analytics.mondon.xyz/js/script.js"></script>
+        <script defer data-domain="camillemondon.com" src="https://analytics.mndn.fr/js/script.js"></script>
   arxiv-pdf:
     authorcols: true
     biblatexoptions:
