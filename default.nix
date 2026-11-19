@@ -43,6 +43,26 @@ let
           };
         };
       })
+      (_: prev: {
+        panache = prev.panache.overrideAttrs (
+          finalAttrs: _: {
+            version = "3.10.0";
+
+            src = prev.fetchFromGitHub {
+              owner = "jolars";
+              repo = "panache";
+              tag = "v${finalAttrs.version}";
+              hash = "sha256-13v2J7qRgkX55vjFt0daU26J/IhmECCr1H0fVEW72rk=";
+            };
+
+            cargoDeps = prev.rustPlatform.fetchCargoVendor {
+              inherit (finalAttrs) src;
+              name = "panache-${finalAttrs.version}";
+              hash = "sha256-D8SfoPjfIHnrvjYG6lJbqAHL1jkAI5st2105OP9md6s=";
+            };
+          }
+        );
+      })
     ];
   };
 
@@ -65,6 +85,10 @@ let
   pre-commit-hook = (import inputs.git-hooks).run {
     src = ./.;
 
+    # git-hooks.nix resolves hook binaries from its own nixpkgs, so pin the
+    # panache hooks to the same derivation as the shell.
+    tools = { inherit (pkgs) panache; };
+
     hooks = {
       statix.enable = true;
       deadnix.enable = true;
@@ -75,6 +99,14 @@ let
         files = "\\.nix$";
       };
       commitizen.enable = true;
+      panache-format = {
+        enable = true;
+        files = "\\.(qmd|Rmd)$";
+      };
+      panache-lint = {
+        enable = true;
+        files = "\\.(qmd|Rmd)$";
+      };
     };
   };
 in
@@ -87,6 +119,8 @@ rec {
       (quarto.override { extraRPackages = r-deps; })
       (rWrapper.override { packages = r-deps; })
       texliveFull
+      panache
+      air-formatter
     ];
     shellHook = ''
       ${pre-commit-hook.shellHook}
