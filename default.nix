@@ -26,16 +26,18 @@ let
               src = pkgs.fetchFromGitHub {
                 owner = "camillemndn";
                 repo = "dda";
-                rev = "v0.0.0.9018";
-                hash = "sha256-ReqTqTTKJC9e0OVabLi9f5vXFZKVAHPQYaZ7rlIxUQU=";
+                rev = "v0.0.0.9021";
+                hash = "sha256-aIlpJ2Mea0huPTjvzVbaaJIpBJq/hSM8moLxgBCpU7g=";
               };
+              nativeBuildInputs = [
+                pkgs.cargo
+                pkgs.rustc
+              ];
               propagatedBuildInputs = [
+                dplyr
                 fda
-                GGally
                 ggplot2
-                ICS
-                ICSOutlier
-                memoise
+                tidyr
               ];
             };
           };
